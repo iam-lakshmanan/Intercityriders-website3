@@ -3383,8 +3383,7 @@ a:hover > .round-arrow,
   justify-content: space-between;
   pointer-events: none;
 }
-.home-carousel-dots,
-.home-carousel-arrows {
+.home-carousel-dots {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -3405,26 +3404,6 @@ a:hover > .round-arrow,
   width: 36px;
   background: var(--orange);
 }
-.home-carousel-arrows button {
-  display: grid;
-  place-items: center;
-  width: 46px;
-  height: 46px;
-  padding: 0;
-  border: 1px solid #200f0740;
-  border-radius: 50%;
-  background: #fff9ebc9;
-  color: var(--espresso);
-  backdrop-filter: blur(8px);
-  transition:
-    transform 0.25s,
-    background 0.25s;
-}
-.home-carousel-arrows button:hover {
-  background: var(--orange);
-  transform: translateY(-2px);
-}
-
 .home-booking-section {
   position: relative;
   z-index: 5;
@@ -3877,10 +3856,6 @@ a:hover > .round-arrow,
   }
   .home-carousel-controls {
     bottom: 25px;
-  }
-  .home-carousel-arrows button {
-    width: 40px;
-    height: 40px;
   }
   .home-booking-section {
     margin-top: -28px;
@@ -5548,5 +5523,20 @@ h3 em,
 @media (max-width: 600px) {
   .section.booking-page-section {
     padding-top: 20px;
+  }
+}
+
+/* Center both footer credits at every screen size. */
+.footer.legacy-footer .footer-bottom {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  text-align: center;
+}
+
+@media (max-width: 600px) {
+  .footer-bottom > span:nth-child(2) {
+    display: inline;
   }
 }

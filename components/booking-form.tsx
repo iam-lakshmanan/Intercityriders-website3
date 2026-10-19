@@ -295,6 +295,7 @@ function BookingFields({
   const router = useRouter();
   const [formError, setFormError] = useState('');
   const [airportFrom, setAirportFrom] = useState(() => airports.includes(initial.pickup || ''));
+  const formRef = useRef<HTMLFormElement>(null);
   const submission = useRef({ id: '', fingerprint: '' });
   const locked = useRef(false);
   const {
@@ -365,13 +366,23 @@ function BookingFields({
       const result = await response.json().catch(() => ({}));
       if (!response.ok || !result.delivered)
         throw new Error(result.error || 'We could not send your enquiry. Please retry.');
-      beginBooking(values, submission.current.id);
+      beginBooking(values, submission.current.id, result.reference, result.liveEstimateAvailable);
       router.push('/estimate');
     } catch (error) {
       setFormError(error instanceof Error ? error.message : 'Please try again.');
     } finally {
       locked.current = false;
     }
+  }
+  function showValidationErrors() {
+    setFormError('Please complete the highlighted fields before requesting your estimate.');
+    window.setTimeout(() => {
+      const firstInvalid = formRef.current?.querySelector<HTMLElement>(
+        '[aria-invalid="true"], [data-invalid="true"]',
+      );
+      firstInvalid?.focus();
+      firstInvalid?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
   }
   function locationField(name: 'pickup' | 'drop', label: string) {
     const isAirport = tripType === 'airport' && (airportFrom ? name === 'pickup' : name === 'drop');
@@ -421,10 +432,11 @@ function BookingFields({
   }
   return (
     <form
+      ref={formRef}
       className="booking-form"
       noValidate
       onSubmit={(event) => {
-        void handleSubmit(submit)(event);
+        void handleSubmit(submit, showValidationErrors)(event);
       }}
     >
       <h2 className="compact-form-heading">Choose your journey</h2>
@@ -546,7 +558,12 @@ function BookingFields({
         <legend className="sr-only">Choose your vehicle</legend>
         <div className="vehicle-options">
           {vehicles.map((item) => (
-            <label key={item.id} className={vehicle === item.id ? 'selected' : ''}>
+            <label
+              key={item.id}
+              className={vehicle === item.id ? 'selected' : ''}
+              data-invalid={errors.vehicle ? 'true' : undefined}
+              tabIndex={errors.vehicle ? -1 : undefined}
+            >
               <input
                 type="radio"
                 value={item.id}

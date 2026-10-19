@@ -59,6 +59,11 @@ export async function POST(request: Request) {
         reference,
         delivered: true as const,
         status: body.event === 'booking-confirmed' ? 'booking-received' : 'enquiry-received',
+        liveEstimateAvailable: Boolean(
+          process.env.GOOGLE_MAPS_SERVER_API_KEY &&
+          process.env.QUOTE_SIGNING_SECRET &&
+          process.env.QUOTE_SIGNING_SECRET.length >= 32,
+        ),
       };
     });
     return Response.json(record);

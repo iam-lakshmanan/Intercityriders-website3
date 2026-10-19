@@ -86,10 +86,13 @@ export function Estimate() {
 }
 function EstimateJourney({ saved }: { saved: SavedBooking }) {
   const form = saved.form!;
+  const liveEstimateUnavailable = saved.liveEstimateAvailable === false;
   const [quote, setQuote] = useState<Quote | null>(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useState(
+    liveEstimateUnavailable ? 'Your fare will be confirmed directly by the booking team.' : '',
+  );
   const [submitError, setSubmitError] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!liveEstimateUnavailable);
   const [busy, setBusy] = useState(false);
   const [attempt, setAttempt] = useState(0);
   const locked = useRef(false);
@@ -100,7 +103,9 @@ function EstimateJourney({ saved }: { saved: SavedBooking }) {
       : form.tripType === 'airport'
         ? 'Airport pickup'
         : 'One way';
+  const manualMessage = `INTERCITY RIDERS\nEnquiry reference: ${saved.enquiryReference || 'Pending'}\n${trip} | ${label}\n${form.pickup} to ${form.drop}\nPickup: ${form.pickupDate} at ${form.pickupTime} IST\nPlease help me confirm the fare and vehicle availability.`;
   useEffect(() => {
+    if (liveEstimateUnavailable) return;
     const controller = new AbortController();
     let active = true;
     async function load() {
@@ -126,7 +131,7 @@ function EstimateJourney({ saved }: { saved: SavedBooking }) {
       active = false;
       controller.abort();
     };
-  }, [form, saved.requestId, attempt]);
+  }, [form, saved.requestId, attempt, liveEstimateUnavailable]);
   async function confirm() {
     if (!quote || locked.current) return;
     locked.current = true;
@@ -275,15 +280,32 @@ function EstimateJourney({ saved }: { saved: SavedBooking }) {
               </>
             ) : (
               <div className="manual-enquiry">
-                <h3>Let’s talk it through.</h3>
-                <p role="status">{error}</p>
+                <h3>Your journey request is received.</h3>
+                {saved.enquiryReference && (
+                  <div className="reference">
+                    YOUR ENQUIRY REFERENCE<strong>{saved.enquiryReference}</strong>
+                  </div>
+                )}
                 <p>
-                  Your initial enquiry has reached the booking team. They can help with a manual
-                  quote.
+                  The booking team has your journey details and will contact you with the fare and
+                  vehicle availability.
                 </p>
-                <a className="button" href={`tel:${site.phone}`}>
-                  Call the booking team <ArrowUpRight size={17} />
-                </a>
+                <p className="fine-print" role="status">
+                  {error}
+                </p>
+                <div className="estimate-actions">
+                  <a className="button" href={`tel:${site.phone}`}>
+                    Call the booking team <ArrowUpRight size={17} />
+                  </a>
+                  <a
+                    className="button button-outline"
+                    href={`https://wa.me/${site.phone.replace(/\D/g, '')}?text=${encodeURIComponent(manualMessage)}`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Continue on WhatsApp <ArrowUpRight size={17} />
+                  </a>
+                </div>
                 <div>
                   <button
                     type="button"

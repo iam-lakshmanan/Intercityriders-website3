@@ -1,6 +1,7 @@
 import 'server-only';
 import { createHash } from 'node:crypto';
 import { sendNotification } from './notify.mjs';
+import { productionUrl } from './site';
 const buckets = new Map<string, { count: number; expires: number }>();
 const submissions = new Map<string, { promise: Promise<unknown>; expires: number }>();
 export class HttpError extends Error {
@@ -11,10 +12,32 @@ export class HttpError extends Error {
     super(message);
   }
 }
+
+function addHostWithAlias(hosts: Set<string>, value: string) {
+  const parsed = new URL(value);
+  const hostname = parsed.hostname.toLowerCase();
+  const alias = hostname.startsWith('www.') ? hostname.slice(4) : `www.${hostname}`;
+  hosts.add(parsed.host.toLowerCase());
+  hosts.add(`${alias}${parsed.port ? `:${parsed.port}` : ''}`);
+}
+
+function requestOriginAllowed(request: Request, origin: string) {
+  try {
+    const parsedOrigin = new URL(origin);
+    if (!['http:', 'https:'].includes(parsedOrigin.protocol)) return false;
+    const allowedHosts = new Set<string>();
+    addHostWithAlias(allowedHosts, request.url);
+    addHostWithAlias(allowedHosts, productionUrl);
+    addHostWithAlias(allowedHosts, process.env.NEXT_PUBLIC_SITE_URL || request.url);
+    return allowedHosts.has(parsedOrigin.host.toLowerCase());
+  } catch {
+    return false;
+  }
+}
+
 export async function readRequest(request: Request) {
   const origin = request.headers.get('origin');
-  const expected = new URL(process.env.NEXT_PUBLIC_SITE_URL || request.url).origin;
-  if (origin && origin !== expected && origin !== new URL(request.url).origin)
+  if (origin && !requestOriginAllowed(request, origin))
     throw new HttpError('Request origin is not allowed.', 403);
   if (!request.headers.get('content-type')?.includes('application/json'))
     throw new HttpError('JSON is required.', 415);

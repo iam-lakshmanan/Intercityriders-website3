@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowDown, ArrowLeft, ArrowRight, ArrowUpRight } from 'lucide-react';
+import { ArrowDown, ArrowUpRight } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
 const slides = [
@@ -129,14 +129,6 @@ export function HomeHeroCarousel() {
               role="tab"
             />
           ))}
-        </div>
-        <div className="home-carousel-arrows">
-          <button type="button" onClick={() => goTo(active - 1)} aria-label="Previous slide">
-            <ArrowLeft size={20} />
-          </button>
-          <button type="button" onClick={() => goTo(active + 1)} aria-label="Next slide">
-            <ArrowRight size={20} />
-          </button>
         </div>
       </div>
     </section>

@@ -131,6 +131,25 @@ assert.equal(
   400,
 );
 assert.equal((await post('/api/contact', null)).status, 400);
+assert.equal(
+  (
+    await post(
+      '/api/contact',
+      {
+        name: 'Origin Alias Test',
+        mobile: '9876543210',
+        email: '',
+        message: 'Canonical www origin alias validation test.',
+        requestId: crypto.randomUUID(),
+        website: '',
+      },
+      'https://www.onewaydroptaxis.com',
+    )
+  ).status,
+  200,
+);
 assert.equal((await post('/api/contact', {}, 'https://untrusted.example')).status, 403);
-console.log('PASS: contact delivery, validation, honeypot, JSON shape and origin controls');
+console.log(
+  'PASS: contact delivery, validation, honeypot, JSON shape, canonical aliases and origin controls',
+);
 console.log('All integration checks passed. All upstream notifications were mocked.');

@@ -154,6 +154,50 @@ test('enquiry retries keep an ID, confirmation shows the fare and clears persona
     /https:\/\/wa.me\//,
   );
 });
+test('a delivered enquiry remains a successful workflow when live pricing is unavailable', async ({
+  page,
+}) => {
+  let fareRequests = 0;
+  await page.route('**/api/enquiry', async (route) => {
+    await route.fulfill({
+      status: 200,
+      json: {
+        delivered: true,
+        reference: 'IR-MANUAL1',
+        status: 'enquiry-received',
+        liveEstimateAvailable: false,
+      },
+    });
+  });
+  await page.route('**/api/fare-estimation', async (route) => {
+    fareRequests += 1;
+    await route.fulfill({
+      status: 503,
+      json: { error: 'Live estimates are temporarily unavailable.' },
+    });
+  });
+  await page.goto('/booking?pickup=Coimbatore&drop=Chennai');
+  await page.locator('#pickupDate').fill('2099-01-10');
+  await page.locator('#pickupTime').fill('10:30');
+  await page.locator('#customerName').fill('Manual Quote Traveller');
+  await page.locator('#mobile').fill('9876543210');
+  await page.getByText('Sedan', { exact: true }).click();
+  await page.getByRole('button', { name: 'Get my fare estimate' }).click();
+  await expect(page).toHaveURL(/\/estimate$/);
+  await expect(
+    page.getByRole('heading', { name: 'Your journey request is received.' }),
+  ).toBeVisible();
+  await expect(page.getByText('IR-MANUAL1', { exact: true })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Call the booking team' })).toHaveAttribute(
+    'href',
+    /^tel:/,
+  );
+  await expect(page.getByRole('link', { name: 'Continue on WhatsApp' })).toHaveAttribute(
+    'href',
+    /https:\/\/wa\.me\//,
+  );
+  expect(fareRequests).toBe(0);
+});
 test('contact validation and mocked delivery', async ({ page }) => {
   await page.goto('/contact-us');
   await page.getByRole('textbox', { name: 'Your name', exact: true }).fill('Browser Contact');
@@ -189,6 +233,9 @@ test('mobile navigation, no horizontal overflow and reduced-motion layout', asyn
   await page.goto('/booking');
   await page.getByRole('button', { name: 'Get my fare estimate' }).click();
   await expect(page.locator('#pickup-error')).toBeVisible();
+  await expect(page.locator('main').getByRole('alert').last()).toContainText(
+    'Please complete the highlighted fields',
+  );
   await settleImages(page);
   await page.screenshot({ path: 'qa/booking-mobile.png', fullPage: true, animations: 'disabled' });
 });

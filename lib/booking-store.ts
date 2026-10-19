@@ -7,6 +7,8 @@ export type Receipt = { reference: string; total: number; vehicleLabel: string; 
 export type SavedBooking = {
   form?: TripForm;
   receipt?: Receipt;
+  enquiryReference?: string;
+  liveEstimateAvailable?: boolean;
   requestId: string;
   expires: number;
 };
@@ -71,8 +73,19 @@ export function saveBooking(data: SavedBooking) {
   }
   for (const callback of listeners) callback();
 }
-export function beginBooking(form: TripForm, requestId = crypto.randomUUID()) {
-  const booking = { form, requestId, expires: Date.now() + 2 * 60 * 60 * 1000 };
+export function beginBooking(
+  form: TripForm,
+  requestId = crypto.randomUUID(),
+  enquiryReference?: string,
+  liveEstimateAvailable?: boolean,
+) {
+  const booking = {
+    form,
+    requestId,
+    enquiryReference,
+    liveEstimateAvailable,
+    expires: Date.now() + 2 * 60 * 60 * 1000,
+  };
   saveBooking(booking);
   return booking;
 }
