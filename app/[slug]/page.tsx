@@ -84,6 +84,15 @@ const canonical: Partial<Record<Slug, string>> = {
   contact: '/contact-us',
   routes: '/service-routes',
 };
+const bannerImages: Partial<Record<Slug, string>> = {
+  about: '/images/page-banners/about-hero.png',
+  services: '/images/page-banners/services-hero.png',
+  tariff: '/images/page-banners/tariff-hero.png',
+  routes: '/images/page-banners/routes-hero.png',
+  contact: '/images/page-banners/contact-hero.png',
+  'service-areas': '/images/page-banners/routes-hero.png',
+  'airport-transfers': '/images/page-banners/services-hero.png',
+};
 function resolve(requested: string): Slug | undefined {
   const slug = Object.hasOwn(aliases, requested) ? aliases[requested] : requested;
   return Object.hasOwn(pages, slug) ? (slug as Slug) : undefined;
@@ -119,13 +128,7 @@ export default async function ContentPage({ params }: { params: Promise<{ slug: 
         title={page.heading}
         accent={page.accent}
         text={page.text}
-        image={
-          slug === 'about'
-            ? '/images/hero.webp'
-            : slug === 'airport-transfers'
-              ? '/images/airport.webp'
-              : undefined
-        }
+        image={bannerImages[slug]}
       />
       {slug === 'services' && (
         <>
@@ -182,7 +185,7 @@ export default async function ContentPage({ params }: { params: Promise<{ slug: 
               </Reveal>
             </div>
           </section>
-          <WhyUs />
+          <WhyUs image="/images/page-banners/about-hero.png" />
           <Process />
         </>
       )}

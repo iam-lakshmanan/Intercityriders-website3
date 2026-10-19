@@ -1,8 +1,10 @@
 import type { MetadataRoute } from 'next';
-import { site } from '@/lib/site';
+
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://onewaydroptaxis.com';
+
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: { userAgent: '*', allow: '/', disallow: ['/api/', '/estimate'] },
-    sitemap: `${site.url}/sitemap.xml`,
+    sitemap: `${siteUrl}/sitemap.xml`,
   };
 }

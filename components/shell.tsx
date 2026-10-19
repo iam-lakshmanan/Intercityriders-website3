@@ -58,7 +58,7 @@ export function Header() {
             ))}
           </nav>
           <div className="header-actions">
-            <a className="button small header-cta" href={`tel:${site.phone}`}>
+            <a className="button small header-call" href={`tel:${site.phone}`}>
               <Phone size={16} /> Call us
             </a>
             <button

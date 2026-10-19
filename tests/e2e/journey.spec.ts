@@ -12,6 +12,38 @@ async function settleImages(page: Page) {
 test.beforeEach(async ({ page }, testInfo) => {
   await page.setExtraHTTPHeaders({ 'x-intercity-test-client': `browser-${testInfo.testId}` });
 });
+test('PWA manifest, branded icons, service worker and offline route are available', async ({
+  request,
+}) => {
+  const manifestResponse = await request.get('/manifest.webmanifest');
+  expect(manifestResponse.ok()).toBeTruthy();
+  const manifest = await manifestResponse.json();
+  expect(manifest.name).toBe('Intercity Riders — One Way Taxi');
+  expect(manifest.display).toBe('standalone');
+  expect(manifest.start_url).toBe('/');
+  expect(manifest.icons).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({ src: '/icons/icon-192.png', sizes: '192x192' }),
+      expect.objectContaining({ src: '/icons/icon-512.png', sizes: '512x512' }),
+      expect.objectContaining({ src: '/icons/maskable-512.png', purpose: 'maskable' }),
+    ]),
+  );
+
+  for (const icon of manifest.icons) {
+    const response = await request.get(icon.src);
+    expect(response.ok()).toBeTruthy();
+    expect(response.headers()['content-type']).toContain('image/png');
+  }
+
+  const worker = await request.get('/sw.js');
+  expect(worker.ok()).toBeTruthy();
+  expect(worker.headers()['service-worker-allowed']).toBe('/');
+  expect(await worker.text()).toContain("'/offline'");
+
+  const offline = await request.get('/offline');
+  expect(offline.ok()).toBeTruthy();
+  expect(await offline.text()).toContain('Your journey is still here.');
+});
 test('all pages and aliases render with one heading and no horizontal overflow', async ({
   page,
 }) => {
@@ -57,15 +89,15 @@ test('homepage carousel, full booking form, fleet, FAQ and desktop layout', asyn
   await expect(
     page.getByText('Your request is sent to our booking team.', { exact: false }),
   ).toBeVisible();
-  await expect(page.getByRole('textbox', { name: 'Pickup location', exact: true })).toBeVisible();
-  await expect(page.getByRole('textbox', { name: 'Drop location', exact: true })).toBeVisible();
+  await expect(page.getByLabel('Pickup location', { exact: true })).toBeVisible();
+  await expect(page.getByLabel('Drop location', { exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Get my fare estimate' })).toBeVisible();
 });
 test('airport direction preserves endpoints when swapped', async ({ page }) => {
   await page.goto('/booking?trip=airport');
   await page.getByRole('button', { name: 'From the airport' }).click();
   await page.getByRole('button', { name: 'To the airport' }).click();
-  await page.locator('#drop').selectOption({ label: 'Chennai International Airport (MAA)' });
+  await page.locator('#drop').fill('Chennai International Airport (MAA)');
   await expect(page.locator('#drop')).toHaveValue('Chennai International Airport (MAA)');
   await page.locator('#pickup').fill('Chennai Central');
   await expect(page.locator('#pickup')).toHaveValue('Chennai Central');
@@ -98,10 +130,7 @@ test('enquiry retries keep an ID, confirmation shows the fare and clears persona
   await page.locator('#pickupTime').fill('10:30');
   await page.locator('#customerName').fill('Browser Test Traveller');
   await page.locator('#mobile').fill('9876543210');
-  await page.locator('#email').fill('traveller@example.com');
   await page.getByText('Sedan', { exact: true }).click();
-  await page.getByRole('checkbox', { name: 'Travelling with an infant' }).check();
-  await page.getByRole('checkbox', { name: 'Extra luggage' }).check();
   await page.getByRole('button', { name: 'Get my fare estimate' }).click();
   await expect(page.locator('main').getByRole('alert')).toContainText('Isolated retry test');
   await page.getByRole('button', { name: 'Get my fare estimate' }).click();
@@ -110,9 +139,6 @@ test('enquiry retries keep an ID, confirmation shows the fare and clears persona
   expect(ids[0]).toBe(ids[1]);
   await expect(page.getByText('₹3,400', { exact: true })).toBeVisible();
   await expect(page.locator('main h1')).toHaveCount(1);
-  await expect(
-    page.getByText('Travelling with an infant · Extra luggage', { exact: true }),
-  ).toBeVisible();
   await page.getByRole('button', { name: 'Confirm my request' }).click();
   await expect(page.locator('main h1')).toContainText('Safely received.');
   const record = await page.evaluate(() =>

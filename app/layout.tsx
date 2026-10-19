@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Header, Footer } from '@/components/shell';
 import { MotionProvider } from '@/components/motion';
+import { PwaRegister } from '@/components/pwa-register';
 import { site } from '@/lib/site';
 import './globals.css';
 export const metadata: Metadata = {
@@ -26,9 +27,23 @@ export const metadata: Metadata = {
     ],
   },
   twitter: { card: 'summary_large_image' },
-  icons: { icon: '/icon.svg', apple: '/icons/icon-192.png' },
+  manifest: '/manifest.webmanifest',
+  appleWebApp: { capable: true, statusBarStyle: 'black-translucent', title: 'Intercity Riders' },
+  formatDetection: { telephone: false },
+  icons: {
+    icon: [
+      { url: '/icons/favicon-32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+    ],
+    apple: [{ url: '/icons/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
+  },
 };
-export const viewport: Viewport = { themeColor: '#FFF9EB', width: 'device-width', initialScale: 1 };
+export const viewport: Viewport = {
+  themeColor: '#200F07',
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+};
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" data-scroll-behavior="smooth">
@@ -40,6 +55,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           <Header />
           <main id="main-content">{children}</main>
           <Footer />
+          <PwaRegister />
         </MotionProvider>
       </body>
     </html>

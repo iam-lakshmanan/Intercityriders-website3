@@ -80,6 +80,7 @@ export function HomeHeroCarousel() {
                 alt="Intercity Riders taxi fleet"
                 fill
                 priority={index === 0}
+                loading="eager"
                 sizes="100vw"
                 className="home-carousel-image"
               />

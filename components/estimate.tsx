@@ -96,9 +96,9 @@ function EstimateJourney({ saved }: { saved: SavedBooking }) {
   const label = vehicles.find((v) => v.id === form.vehicle)?.label || form.vehicle;
   const trip =
     form.tripType === 'roundtrip'
-      ? 'There & back'
+      ? 'Round trip'
       : form.tripType === 'airport'
-        ? 'Airport transfer'
+        ? 'Airport pickup'
         : 'One way';
   useEffect(() => {
     const controller = new AbortController();

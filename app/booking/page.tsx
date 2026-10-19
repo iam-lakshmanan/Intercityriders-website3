@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import { BookingWorkspace } from '@/components/booking-workspace';
-import { PageHero } from '@/components/sections';
 import type { TripForm } from '@/lib/booking-store';
 export const metadata: Metadata = {
   title: 'Book your next journey',
@@ -23,18 +22,11 @@ export default async function BookingPage({
   if (['sedan', 'prime_sedan', 'suv', 'prime_suv'].includes(vehicle))
     initial.vehicle = vehicle as TripForm['vehicle'];
   return (
-    <>
-      <PageHero
-        eyebrow="LET’S MAKE A LITTLE PLAN"
-        title="Your next journey."
-        accent="Made yours."
-        text="Start with the details. Find your comfort. We’ll help with the road ahead."
-      />
-      <section className="section booking-page-section">
-        <div className="container">
-          <BookingWorkspace initial={initial} />
-        </div>
-      </section>
-    </>
+    <section className="section booking-page-section">
+      <h1 className="sr-only">Book your Intercity Riders journey</h1>
+      <div className="container">
+        <BookingWorkspace initial={initial} />
+      </div>
+    </section>
   );
 }

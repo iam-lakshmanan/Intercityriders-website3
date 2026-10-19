@@ -1,12 +1,22 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
-import Link from 'next/link';
 import Image from 'next/image';
 import { useForm, useWatch, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useJsApiLoader, type Libraries } from '@react-google-maps/api';
 import { useRouter } from 'next/navigation';
-import { ArrowUpRight, CarFront, Check, Plane, RefreshCw, Route } from 'lucide-react';
+import {
+  ArrowUpRight,
+  CalendarDays,
+  Check,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  Clock3,
+  Plane,
+  RefreshCw,
+  Route,
+} from 'lucide-react';
 import { tripSchema } from '@/lib/validation.mjs';
 import { rates, vehicles } from '@/lib/fare.mjs';
 import { beginBooking, useSavedBooking, type TripForm } from '@/lib/booking-store';
@@ -23,15 +33,221 @@ const airports = [
   'Vellore Airport (VOVR)',
   'Hosur Aerodrome (VO95)',
 ];
-export type RouteDraft = { pickup: string; drop: string };
-function StepHeading({ number, title }: { number: string; title: string }) {
+
+type CustomControlProps = {
+  value: string;
+  onChange: (value: string) => void;
+  onBlur: () => void;
+  invalid?: boolean;
+  describedBy?: string;
+};
+
+function AirportControl({
+  id,
+  ...props
+}: CustomControlProps & {
+  id: 'pickup' | 'drop';
+}) {
+  const [open, setOpen] = useState(false);
+  const query = props.value.toLowerCase();
+  const options = airports.filter((airport) => airport.toLowerCase().includes(query));
   return (
-    <div className="form-step-heading">
-      <span>{number}</span>
-      <h2>{title}</h2>
+    <div className="custom-control">
+      <input
+        id={id}
+        role="combobox"
+        value={props.value}
+        placeholder="Choose your airport"
+        autoComplete="off"
+        aria-autocomplete="list"
+        aria-expanded={open}
+        aria-controls={`${id}-airport-options`}
+        aria-invalid={props.invalid}
+        aria-describedby={props.describedBy}
+        onFocus={() => setOpen(true)}
+        onChange={(event) => {
+          props.onChange(event.target.value);
+          setOpen(true);
+        }}
+        onBlur={() => {
+          props.onBlur();
+          window.setTimeout(() => setOpen(false), 120);
+        }}
+      />
+      <ChevronDown className="custom-control-icon" size={18} />
+      {open && (
+        <div
+          className="custom-control-popover airport-options"
+          id={`${id}-airport-options`}
+          role="listbox"
+        >
+          {options.map((airport) => (
+            <button
+              type="button"
+              role="option"
+              aria-selected={props.value === airport}
+              key={airport}
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={() => {
+                props.onChange(airport);
+                setOpen(false);
+              }}
+            >
+              <Plane size={16} />
+              <span>{airport}</span>
+              {props.value === airport && <Check size={15} />}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
+
+function DateControl({ value, onChange, onBlur, invalid, describedBy }: CustomControlProps) {
+  const today = new Date();
+  const selected = /^\d{4}-\d{2}-\d{2}$/.test(value) ? new Date(`${value}T12:00:00`) : null;
+  const [open, setOpen] = useState(false);
+  const [view, setView] = useState(() => selected || today);
+  const year = view.getFullYear();
+  const month = view.getMonth();
+  const firstDay = new Date(year, month, 1).getDay();
+  const days = new Date(year, month + 1, 0).getDate();
+  const todayIso = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' }).format(today);
+  const monthLabel = new Intl.DateTimeFormat('en', { month: 'long', year: 'numeric' }).format(view);
+  const toIso = (day: number) =>
+    `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+  return (
+    <div className="custom-control">
+      <input
+        id="pickupDate"
+        value={value}
+        inputMode="numeric"
+        placeholder="YYYY-MM-DD"
+        aria-invalid={invalid}
+        aria-describedby={describedBy}
+        onFocus={() => setOpen(true)}
+        onChange={(event) => onChange(event.target.value)}
+        onBlur={() => {
+          onBlur();
+          window.setTimeout(() => setOpen(false), 120);
+        }}
+      />
+      <CalendarDays className="custom-control-icon" size={18} />
+      {open && (
+        <div
+          className="custom-control-popover date-popover"
+          role="dialog"
+          aria-label="Choose pickup date"
+        >
+          <div className="calendar-heading">
+            <strong>{monthLabel}</strong>
+            <div>
+              <button
+                type="button"
+                aria-label="Previous month"
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={() => setView(new Date(year, month - 1, 1))}
+              >
+                <ChevronLeft size={18} />
+              </button>
+              <button
+                type="button"
+                aria-label="Next month"
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={() => setView(new Date(year, month + 1, 1))}
+              >
+                <ChevronRight size={18} />
+              </button>
+            </div>
+          </div>
+          <div className="calendar-weekdays" aria-hidden="true">
+            {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map((day) => (
+              <span key={day}>{day}</span>
+            ))}
+          </div>
+          <div className="calendar-days">
+            {Array.from({ length: firstDay }, (_, index) => (
+              <span key={`empty-${index}`} />
+            ))}
+            {Array.from({ length: days }, (_, index) => {
+              const day = index + 1;
+              const iso = toIso(day);
+              return (
+                <button
+                  type="button"
+                  key={iso}
+                  disabled={iso < todayIso}
+                  className={value === iso ? 'selected' : iso === todayIso ? 'today' : ''}
+                  onMouseDown={(event) => event.preventDefault()}
+                  onClick={() => {
+                    onChange(iso);
+                    setOpen(false);
+                  }}
+                >
+                  {day}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function TimeControl({ value, onChange, onBlur, invalid, describedBy }: CustomControlProps) {
+  const [open, setOpen] = useState(false);
+  const times = Array.from({ length: 48 }, (_, index) => {
+    const hour = Math.floor(index / 2);
+    const minute = index % 2 ? '30' : '00';
+    return `${String(hour).padStart(2, '0')}:${minute}`;
+  });
+  return (
+    <div className="custom-control">
+      <input
+        id="pickupTime"
+        value={value}
+        inputMode="numeric"
+        placeholder="HH:MM"
+        aria-invalid={invalid}
+        aria-describedby={describedBy}
+        onFocus={() => setOpen(true)}
+        onChange={(event) => onChange(event.target.value)}
+        onBlur={() => {
+          onBlur();
+          window.setTimeout(() => setOpen(false), 120);
+        }}
+      />
+      <Clock3 className="custom-control-icon" size={18} />
+      {open && (
+        <div
+          className="custom-control-popover time-options"
+          role="listbox"
+          aria-label="Choose pickup time"
+        >
+          {times.map((time) => (
+            <button
+              type="button"
+              role="option"
+              aria-selected={value === time}
+              className={value === time ? 'selected' : ''}
+              key={time}
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={() => {
+                onChange(time);
+                setOpen(false);
+              }}
+            >
+              {time}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+export type RouteDraft = { pickup: string; drop: string };
 export function BookingForm({
   initial = {},
   onRouteChange,
@@ -167,17 +383,14 @@ function BookingFields({
           name={name}
           render={({ field }) =>
             isAirport ? (
-              <select
+              <AirportControl
                 id={name}
-                {...field}
-                aria-invalid={!!errors[name]}
-                aria-describedby={errors[name] ? `${name}-error` : undefined}
-              >
-                <option value="">Choose your airport</option>
-                {airports.map((airport) => (
-                  <option key={airport}>{airport}</option>
-                ))}
-              </select>
+                value={field.value}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+                invalid={!!errors[name]}
+                describedBy={errors[name] ? `${name}-error` : undefined}
+              />
             ) : mapsLoaded ? (
               <PlaceInput
                 value={field.value}
@@ -214,21 +427,12 @@ function BookingFields({
         void handleSubmit(submit)(event);
       }}
     >
-      <div className="booking-form-intro">
-        <span>
-          <CarFront size={22} />
-        </span>
-        <div>
-          <strong>A good place to start.</strong>
-          <small>Your plan, in a few simple details.</small>
-        </div>
-      </div>
-      <StepHeading number="01" title="What’s your kind of journey?" />
+      <h2 className="compact-form-heading">Choose your journey</h2>
       <div className="booking-trip-tabs" role="group" aria-label="Journey type">
         {[
           { id: 'oneway' as const, label: 'One way', Icon: Route },
-          { id: 'roundtrip' as const, label: 'There & back', Icon: RefreshCw },
-          { id: 'airport' as const, label: 'Airport transfer', Icon: Plane },
+          { id: 'roundtrip' as const, label: 'Round trip', Icon: RefreshCw },
+          { id: 'airport' as const, label: 'Airport pickup', Icon: Plane },
         ].map(({ id, label, Icon }) => (
           <button
             key={id}
@@ -243,7 +447,7 @@ function BookingFields({
         ))}
       </div>
       {tripType === 'airport' && (
-        <div className="airport-direction" role="group" aria-label="Airport transfer direction">
+        <div className="airport-direction" role="group" aria-label="Airport pickup direction">
           <span>I’m travelling</span>
           {[true, false].map((from) => (
             <button
@@ -273,34 +477,41 @@ function BookingFields({
           tripType === 'airport' && !airportFrom ? 'Destination airport' : 'Drop location',
         )}
       </div>
-      <StepHeading number="02" title="Make a little time for it." />
-      <div className="form-grid">
+      <div className="booking-details-grid">
         <div className="field">
           <label htmlFor="pickupDate">Pickup date</label>
-          <input
-            type="date"
-            id="pickupDate"
-            min={new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' }).format(new Date())}
-            {...register('pickupDate')}
-            aria-invalid={!!errors.pickupDate}
-            aria-describedby={errors.pickupDate ? 'pickupDate-error' : undefined}
+          <Controller
+            control={control}
+            name="pickupDate"
+            render={({ field }) => (
+              <DateControl
+                value={field.value}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+                invalid={!!errors.pickupDate}
+                describedBy={errors.pickupDate ? 'pickupDate-error' : undefined}
+              />
+            )}
           />
           {fieldError('pickupDate')}
         </div>
         <div className="field">
           <label htmlFor="pickupTime">Pickup time · IST</label>
-          <input
-            type="time"
-            id="pickupTime"
-            {...register('pickupTime')}
-            aria-invalid={!!errors.pickupTime}
-            aria-describedby={errors.pickupTime ? 'pickupTime-error' : undefined}
+          <Controller
+            control={control}
+            name="pickupTime"
+            render={({ field }) => (
+              <TimeControl
+                value={field.value}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+                invalid={!!errors.pickupTime}
+                describedBy={errors.pickupTime ? 'pickupTime-error' : undefined}
+              />
+            )}
           />
           {fieldError('pickupTime')}
         </div>
-      </div>
-      <StepHeading number="03" title="Who’s coming along?" />
-      <div className="form-grid passenger-fields">
         <div className="field">
           <label htmlFor="customerName">Your name</label>
           <input
@@ -329,21 +540,8 @@ function BookingFields({
           />
           {fieldError('mobile')}
         </div>
-        <div className="field full-width">
-          <label htmlFor="email">Email · optional</label>
-          <input
-            id="email"
-            type="email"
-            autoComplete="email"
-            placeholder="you@example.com"
-            {...register('email')}
-            aria-invalid={!!errors.email}
-            aria-describedby={errors.email ? 'email-error' : undefined}
-          />
-          {fieldError('email')}
-        </div>
       </div>
-      <StepHeading number="04" title="Find your comfort zone." />
+      <h2 className="compact-form-heading vehicle-heading">Choose your car</h2>
       <fieldset className="vehicle-fieldset">
         <legend className="sr-only">Choose your vehicle</legend>
         <div className="vehicle-options">
@@ -372,24 +570,6 @@ function BookingFields({
         </div>
         {fieldError('vehicle')}
       </fieldset>
-      <fieldset className="requirements">
-        <legend>
-          A little extra care? <span className="fine-print">Optional</span>
-        </legend>
-        <div className="requirement-options">
-          {[
-            ['womanAlone', 'Woman travelling alone'],
-            ['seniorCitizen', 'Senior traveller'],
-            ['travellingWithInfant', 'Travelling with an infant'],
-            ['extraLuggage', 'Extra luggage'],
-          ].map(([name, label]) => (
-            <label key={name}>
-              <input type="checkbox" {...register(name as keyof TripForm)} />
-              {label}
-            </label>
-          ))}
-        </div>
-      </fieldset>
       {formError && (
         <p role="alert" className="error-message">
           {formError}
@@ -399,11 +579,6 @@ function BookingFields({
         {isSubmitting ? 'Sending your enquiry…' : 'Get my fare estimate'}
         <ArrowUpRight size={19} />
       </button>
-      <p className="privacy-note">
-        Continuing sends your details to our booking team through Telegram, then opens your
-        estimate. Your request is subject to availability. Read our{' '}
-        <Link href="/privacy">privacy policy</Link>.
-      </p>
     </form>
   );
 }

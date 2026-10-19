@@ -47,8 +47,8 @@ export function QuickBooking() {
           <small>MAKE IT YOURS</small>
           <select name="trip" aria-label="Journey type">
             <option value="oneway">One-way journey</option>
-            <option value="roundtrip">There & back</option>
-            <option value="airport">Airport transfer</option>
+            <option value="roundtrip">Round trip</option>
+            <option value="airport">Airport pickup</option>
           </select>
         </span>
       </label>

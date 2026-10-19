@@ -1,5 +1,7 @@
 import type { MetadataRoute } from 'next';
-import { site } from '@/lib/site';
+
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://onewaydroptaxis.com';
+
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
     '',
@@ -13,7 +15,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/contact-us',
     '/privacy',
   ].map((path) => ({
-    url: `${site.url}${path}`,
+    url: `${siteUrl}${path}`,
     changeFrequency: 'monthly',
     priority: path ? 0.7 : 1,
   }));

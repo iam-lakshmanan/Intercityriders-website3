@@ -9,7 +9,6 @@ import {
   Check,
   MoveUpRight,
   Users,
-  Luggage,
 } from 'lucide-react';
 import { Reveal } from './motion';
 import { journeys, bookingLink } from '@/lib/site';
@@ -53,6 +52,7 @@ export function ServicesSection({ full = false }: { full?: boolean }) {
       type: 'ONE-WAY',
       text: 'A new city. A family visit. A fresh start. Get where you’re going, with no return journey to plan.',
       trip: 'oneway',
+      image: '/images/destination-1.webp',
     },
     {
       icon: RefreshCw,
@@ -60,13 +60,15 @@ export function ServicesSection({ full = false }: { full?: boolean }) {
       type: 'ROUND TRIP',
       text: 'Keep the whole journey together. A day out, a weekend away, and a comfortable ride home.',
       trip: 'roundtrip',
+      image: '/images/destination-2.webp',
     },
     {
       icon: Plane,
-      name: 'Catch your flight.',
-      type: 'AIRPORT TRANSFER',
+      name: 'Airport pickup.',
+      type: 'AIRPORT PICKUP',
       text: 'From doorstep to departures, or arrivals to home. Make the road part of your trip feel easy.',
       trip: 'airport',
+      image: '/images/airport.webp',
     },
   ];
   return (
@@ -83,25 +85,36 @@ export function ServicesSection({ full = false }: { full?: boolean }) {
           {services.map(({ icon: Icon, ...s }, i) => (
             <Reveal key={s.trip} delay={i * 0.08}>
               <Link
-                className="service-row"
+                className={`service-row service-row-${s.trip}`}
                 href={
                   s.trip === 'airport'
                     ? '/airport-transfers'
                     : bookingLink(undefined, undefined, s.trip)
                 }
               >
-                <span className="service-number">0{i + 1}</span>
-                <div className="service-icon">
-                  <Icon size={28} strokeWidth={1.3} />
+                <div className="service-visual">
+                  <Image
+                    src={s.image}
+                    alt=""
+                    width={900}
+                    height={560}
+                    sizes="(max-width: 850px) 100vw, 38vw"
+                  />
+                  <span className="service-number">0{i + 1}</span>
                 </div>
-                <div className="service-copy">
-                  <span className="eyebrow">{s.type}</span>
-                  <h3>{s.name}</h3>
+                <div className="service-body">
+                  <div className="service-icon">
+                    <Icon size={28} strokeWidth={1.3} />
+                  </div>
+                  <div className="service-copy">
+                    <span className="eyebrow">{s.type}</span>
+                    <h3>{s.name}</h3>
+                  </div>
+                  <p>{s.text}</p>
+                  <span className="round-arrow">
+                    <ArrowUpRight />
+                  </span>
                 </div>
-                <p>{s.text}</p>
-                <span className="round-arrow">
-                  <ArrowUpRight />
-                </span>
               </Link>
             </Reveal>
           ))}
@@ -135,6 +148,7 @@ export function RoutesSection({ all = false }: { all?: boolean }) {
                     sizes="(max-width:700px) 92vw, 46vw"
                   />
                   <span className="destination-label">{r.tag}</span>
+                  <h3 className="destination-place">{r.to}</h3>
                   <span className="photo-arrow">
                     <ArrowUpRight size={26} />
                   </span>
@@ -142,7 +156,6 @@ export function RoutesSection({ all = false }: { all?: boolean }) {
                 <div className="destination-caption">
                   <div>
                     <span className="eyebrow">FROM {r.from.toUpperCase()}</span>
-                    <h3>{r.to}</h3>
                   </div>
                   <p>{r.note}</p>
                 </div>
@@ -169,14 +182,17 @@ export function Fleet() {
           {vehicles.map((vehicle, index) => (
             <Reveal key={vehicle.id} delay={index * 0.06}>
               <article className="classic-fleet-card">
-                <div className="classic-fleet-image">
-                  <span className="fleet-label">
-                    {index === 3
-                      ? 'PREMIUM COMFORT'
-                      : index === 2
-                        ? 'FAMILY FAVOURITE'
-                        : 'MADE FOR THE MILES'}
+                <div className="classic-fleet-head">
+                  <div>
+                    <span>INTERCITY FLEET</span>
+                    <h3>{vehicle.label}</h3>
+                  </div>
+                  <span className="fleet-index">0{index + 1}</span>
+                  <span className="fleet-seat-pill">
+                    <Users size={18} strokeWidth={1.8} /> {vehicle.seats} SEATER
                   </span>
+                </div>
+                <div className="classic-fleet-image">
                   <Image
                     src={vehicle.image}
                     alt={`${vehicle.label} vehicle example`}
@@ -186,24 +202,24 @@ export function Fleet() {
                   />
                 </div>
                 <div className="classic-fleet-content">
-                  <div className="classic-fleet-title">
-                    <h3>{vehicle.label}</h3>
-                    <span>
-                      ₹{rates.oneway[vehicle.id as keyof typeof rates.oneway]}
-                      <small>/km</small>
-                    </span>
-                  </div>
-                  <p>{vehicle.note}</p>
-                  <div className="vehicle-specs">
-                    <span>
-                      <Users size={14} /> {vehicle.seats} passengers
-                    </span>
-                    <span>
-                      <Luggage size={14} /> {vehicle.bags} bags
-                    </span>
+                  <div className="classic-fleet-rates">
+                    <div>
+                      <small>ONE WAY</small>
+                      <strong>
+                        ₹{rates.oneway[vehicle.id as keyof typeof rates.oneway]}
+                        <span>/km</span>
+                      </strong>
+                    </div>
+                    <div>
+                      <small>ROUND TRIP</small>
+                      <strong>
+                        ₹{rates.roundtrip[vehicle.id as keyof typeof rates.roundtrip]}
+                        <span>/km</span>
+                      </strong>
+                    </div>
                   </div>
                   <Link href={`/booking?vehicle=${vehicle.id}`} className="button button-full">
-                    Choose this ride <ArrowUpRight size={17} />
+                    Choose this car <ArrowUpRight size={17} />
                   </Link>
                 </div>
               </article>
@@ -270,14 +286,14 @@ export function Process() {
     </section>
   );
 }
-export function WhyUs() {
+export function WhyUs({ image = '/images/hero.webp' }: { image?: string }) {
   return (
     <section className="section">
       <div className="container care-layout">
-        <Reveal className="care-image">
+        <Reveal className={`care-image ${image.includes('about-hero') ? 'care-image-about' : ''}`}>
           <Image
-            src="/images/hero.webp"
-            alt="An unhurried drive through the mountains"
+            src={image}
+            alt="A comfortable Intercity Riders journey"
             fill
             sizes="(max-width:800px) 92vw, 48vw"
           />
@@ -330,11 +346,11 @@ export function Faq() {
     ],
     [
       'Can I plan an airport pickup?',
-      'Yes. Choose Airport transfer, then From the airport or To the airport. Add the other endpoint and your preferred pickup time.',
+      'Yes. Choose Airport pickup, then From the airport or To the airport. Add the other endpoint and your preferred pickup time.',
     ],
     [
       'Can I request a little extra help?',
-      'Yes. The booking form has options for senior travellers, infants, extra luggage and a woman travelling alone. Our team will review your requirements.',
+      'Yes. Call or message our booking team after sending your journey request, and they will help note any additional travel requirements.',
     ],
     [
       'What if a live estimate isn’t available?',
@@ -392,7 +408,13 @@ export function PageHero({
   image?: string;
 }) {
   return (
-    <section className={`page-intro ${image ? 'with-photo' : ''}`}>
+    <section className={`page-intro ${image ? 'with-background' : ''}`}>
+      {image && (
+        <>
+          <Image className="page-intro-background" src={image} alt="" fill sizes="100vw" priority />
+          <div className="page-intro-overlay" />
+        </>
+      )}
       <div className="container">
         <Reveal>
           <div className="page-breadcrumb">
@@ -410,17 +432,6 @@ export function PageHero({
             <p>{text}</p>
           </div>
         </Reveal>
-        {image && (
-          <Reveal className="page-intro-image">
-            <Image
-              src={image}
-              alt="Find a new perspective on your next journey"
-              fill
-              sizes="(max-width:800px) 92vw, 42vw"
-              priority
-            />
-          </Reveal>
-        )}
       </div>
     </section>
   );
