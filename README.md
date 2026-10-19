@@ -4,9 +4,9 @@ A new local Next.js 16 / React 19 website based on the booking functionality of 
 
 ## Run
 
-Use Node 22.15–24. Run `npm ci`, copy `.env.example` to `.env.local`, configure the services, then run `npm run dev`. Preview: http://localhost:3020.
+Use Node 22.15–24. Run `npm ci`, copy `.env.example` to `.env.local`, configure the services, then run `npm run dev`. Preview: http://localhost:3000.
 
-For production, run `npm run build` and `npm start`. The start script prepares the standalone output and serves on port 3020, or the `PORT` environment value. Docker serves on port 3000. Public environment values are embedded during build, so rebuild when they change.
+For production, run `npm run build` and `npm start`. The start script prepares the standalone output and serves on port 3000, or the `PORT` environment value. Docker serves on port 3000. Public environment values are embedded during build, so rebuild when they change.
 
 No original environment files or production secrets were copied. Without service credentials, the UI remains browsable and shows honest unavailable-service states; forms never report a successful delivery that did not happen.
 

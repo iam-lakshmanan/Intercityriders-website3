@@ -6,12 +6,12 @@ export const site = {
   location: 'Tamil Nadu, India',
 };
 export const navigation = [
-  ['Home', '/'],
-  ['Our story', '/about-us'],
-  ['Services', '/services'],
-  ['Routes', '/service-routes'],
-  ['Fares', '/tariff'],
-  ['Contact', '/contact-us'],
+  ['HOME', '/'],
+  ['ABOUT', '/about-us'],
+  ['SERVICES', '/services'],
+  ['TARIFF', '/tariff'],
+  ['ROUTES', '/service-routes'],
+  ['CONTACT US', '/contact-us'],
 ] as const;
 export const journeys = [
   {
@@ -77,5 +77,15 @@ export function bookingLink(from?: string, to?: string, trip = 'oneway') {
   if (to) search.set('drop', to);
   return `/booking?${search}`;
 }
-export const footerCities = cities.slice(0, 5).map((name) => ({ name, pickup: name }));
-export const socialLinks: { label: string; href: string }[] = [];
+export const footerCities = [
+  { name: 'Chennai', pickup: 'Chennai, Tamil Nadu, India' },
+  { name: 'Coimbatore', pickup: 'Coimbatore, Tamil Nadu, India' },
+  { name: 'Bangalore', pickup: 'Bengaluru, Karnataka, India' },
+  { name: 'Madurai', pickup: 'Madurai, Tamil Nadu, India' },
+  { name: 'Trichy', pickup: 'Tiruchirappalli, Tamil Nadu, India' },
+];
+export const socialLinks = [
+  { label: 'Facebook', href: 'https://facebook.com/onewaytaxi' },
+  { label: 'Twitter', href: 'https://twitter.com/onewaytaxi' },
+  { label: 'Instagram', href: 'https://instagram.com/onewaytaxi' },
+];

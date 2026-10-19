@@ -44,30 +44,31 @@ test('all pages and aliases render with one heading and no horizontal overflow',
   }
   expect((await page.goto('/a-route-that-does-not-exist'))?.status()).toBe(404);
 });
-test('homepage planner, fleet interaction, FAQ and desktop layout', async ({ page }) => {
+test('homepage carousel, full booking form, fleet, FAQ and desktop layout', async ({ page }) => {
   await page.goto('/');
-  await page.getByRole('button', { name: /Prime SUV/ }).click();
+  await expect(page.getByRole('heading', { name: /Your city\. Your pickup/ })).toBeVisible();
+  await page.getByRole('button', { name: 'Next slide' }).click();
+  await expect(page.locator('.home-carousel-slide[aria-hidden="false"] h2')).toContainText(
+    'One city to the next.',
+  );
+  await expect(page.locator('.classic-fleet-card')).toHaveCount(4);
   await expect(page.getByRole('heading', { name: 'Prime SUV', exact: true })).toBeVisible();
   await page.locator('summary').filter({ hasText: 'Does submitting reserve a car?' }).click();
   await expect(
     page.getByText('Your request is sent to our booking team.', { exact: false }),
   ).toBeVisible();
-  await page.getByRole('textbox', { name: 'Pickup location', exact: true }).fill('Coimbatore');
-  await page.getByRole('textbox', { name: 'Destination', exact: true }).fill('Chennai');
-  await page.getByRole('combobox', { name: 'Journey type' }).selectOption('roundtrip');
-  await page.getByRole('button', { name: 'Find my ride' }).click();
-  await expect(page).toHaveURL(/trip=roundtrip/);
-  await expect(page.locator('#pickup')).toHaveValue('Coimbatore');
-  await expect(page.locator('#drop')).toHaveValue('Chennai');
-  await expect(page.getByRole('button', { name: 'There & back', exact: true })).toHaveAttribute(
-    'aria-pressed',
-    'true',
-  );
+  await expect(page.getByRole('textbox', { name: 'Pickup location', exact: true })).toBeVisible();
+  await expect(page.getByRole('textbox', { name: 'Drop location', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Get my fare estimate' })).toBeVisible();
 });
 test('airport direction preserves endpoints when swapped', async ({ page }) => {
   await page.goto('/booking?trip=airport');
+  await page.getByRole('button', { name: 'From the airport' }).click();
+  await page.getByRole('button', { name: 'To the airport' }).click();
   await page.locator('#drop').selectOption({ label: 'Chennai International Airport (MAA)' });
+  await expect(page.locator('#drop')).toHaveValue('Chennai International Airport (MAA)');
   await page.locator('#pickup').fill('Chennai Central');
+  await expect(page.locator('#pickup')).toHaveValue('Chennai Central');
   await page.getByRole('button', { name: 'From the airport' }).click();
   await expect(page.locator('#pickup')).toHaveValue('Chennai International Airport (MAA)');
   await expect(page.locator('#drop')).toHaveValue('Chennai Central');
@@ -141,7 +142,7 @@ test('mobile navigation, no horizontal overflow and reduced-motion layout', asyn
   await page.setViewportSize({ width: 390, height: 844 });
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');
-  await expect(page.getByRole('heading', { name: /Good roads/ })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /Your city\. Your pickup/ })).toBeVisible();
   expect(
     await page.locator('body').evaluate((el) => el.scrollWidth <= window.innerWidth),
   ).toBeTruthy();
@@ -149,7 +150,7 @@ test('mobile navigation, no horizontal overflow and reduced-motion layout', asyn
   await page.screenshot({ path: 'qa/home-mobile.png', fullPage: true, animations: 'disabled' });
   await page.getByRole('button', { name: 'Open navigation' }).click();
   await expect(page.getByRole('dialog', { name: 'Site navigation' })).toBeVisible();
-  await page.getByRole('dialog').getByRole('link', { name: 'Services', exact: true }).click();
+  await page.getByRole('dialog').getByRole('link', { name: 'SERVICES', exact: true }).click();
   await expect(page).toHaveURL(/\/services$/);
   await expect(page.getByRole('dialog')).not.toBeVisible();
   for (const path of ['/booking', '/tariff', '/contact-us']) {

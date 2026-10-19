@@ -8,10 +8,12 @@ import {
   RefreshCw,
   Check,
   MoveUpRight,
+  Users,
+  Luggage,
 } from 'lucide-react';
 import { Reveal } from './motion';
 import { journeys, bookingLink } from '@/lib/site';
-import { FleetShowcase } from './fleet-showcase';
+import { rates, vehicles } from '@/lib/fare.mjs';
 export function SectionHeading({
   eyebrow,
   title,
@@ -163,9 +165,55 @@ export function Fleet() {
             text="A solo escape or the whole family along. Find the car that fits your journey."
           />
         </Reveal>
-        <Reveal>
-          <FleetShowcase />
-        </Reveal>
+        <div className="fleet-card-grid">
+          {vehicles.map((vehicle, index) => (
+            <Reveal key={vehicle.id} delay={index * 0.06}>
+              <article className="classic-fleet-card">
+                <div className="classic-fleet-image">
+                  <span className="fleet-label">
+                    {index === 3
+                      ? 'PREMIUM COMFORT'
+                      : index === 2
+                        ? 'FAMILY FAVOURITE'
+                        : 'MADE FOR THE MILES'}
+                  </span>
+                  <Image
+                    src={vehicle.image}
+                    alt={`${vehicle.label} vehicle example`}
+                    width={600}
+                    height={350}
+                    sizes="(max-width: 640px) 100vw, (max-width: 1100px) 50vw, 25vw"
+                  />
+                </div>
+                <div className="classic-fleet-content">
+                  <div className="classic-fleet-title">
+                    <h3>{vehicle.label}</h3>
+                    <span>
+                      ₹{rates.oneway[vehicle.id as keyof typeof rates.oneway]}
+                      <small>/km</small>
+                    </span>
+                  </div>
+                  <p>{vehicle.note}</p>
+                  <div className="vehicle-specs">
+                    <span>
+                      <Users size={14} /> {vehicle.seats} passengers
+                    </span>
+                    <span>
+                      <Luggage size={14} /> {vehicle.bags} bags
+                    </span>
+                  </div>
+                  <Link href={`/booking?vehicle=${vehicle.id}`} className="button button-full">
+                    Choose this ride <ArrowUpRight size={17} />
+                  </Link>
+                </div>
+              </article>
+            </Reveal>
+          ))}
+        </div>
+        <p className="fine-print fleet-disclaimer">
+          Example vehicle images. Model subject to availability. One-way rates shown; minimum 130 km
+          + ₹400 driver allowance. Other charges may apply.
+        </p>
       </div>
     </section>
   );

@@ -1,19 +1,32 @@
 'use client';
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useRef } from 'react';
-import { ArrowUpRight, Menu, X, Phone, MoveUpRight } from 'lucide-react';
-import { site, navigation } from '@/lib/site';
+import {
+  ArrowUpRight,
+  Clock3,
+  Mail,
+  MapPin,
+  Menu,
+  Phone,
+  Route,
+  ShieldCheck,
+  X,
+} from 'lucide-react';
+import { bookingLink, footerCities, navigation, site, socialLinks } from '@/lib/site';
 import { Reveal } from './motion';
 export function Logo() {
   return (
-    <span className="wordmark">
-      <span className="brand-symbol">
-        <MoveUpRight strokeWidth={2.5} />
-      </span>
-      <span>
-        intercity<span className="wordmark-small">RIDERS · GO WELL.</span>
-      </span>
+    <span className="brand-logo">
+      <Image
+        src="/images/car-logo3-transparent.png"
+        alt="Intercity Riders — The one you can trust"
+        width={3692}
+        height={1120}
+        sizes="(max-width: 640px) 164px, 204px"
+        priority
+      />
     </span>
   );
 }
@@ -27,12 +40,6 @@ export function Header() {
   };
   return (
     <>
-      <div className="topnote">
-        <span>GOOD JOURNEYS START WITH GOOD COMPANY.</span>
-        <a href={`tel:${site.phone}`}>
-          Let’s talk travel <Phone size={12} />
-        </a>
-      </div>
       <header className="header">
         <div className="container header-inner">
           <Link href="/" aria-label="Intercity Riders home">
@@ -43,6 +50,7 @@ export function Header() {
               <Link
                 href={href}
                 key={href}
+                className={(aliases[pathname] || pathname) === href ? 'active' : undefined}
                 aria-current={(aliases[pathname] || pathname) === href ? 'page' : undefined}
               >
                 {name}
@@ -50,9 +58,9 @@ export function Header() {
             ))}
           </nav>
           <div className="header-actions">
-            <Link className="button small" href="/booking">
-              Book a ride <ArrowUpRight size={17} />
-            </Link>
+            <a className="button small header-cta" href={`tel:${site.phone}`}>
+              <Phone size={16} /> Call us
+            </a>
             <button
               className="menu-toggle icon-button"
               aria-label="Open navigation"
@@ -83,74 +91,130 @@ export function Header() {
             </Link>
           ))}
         </nav>
-        <Link className="button" href="/booking" onClick={() => dialog.current?.close()}>
-          Plan your ride <ArrowUpRight />
-        </Link>
+        <a className="button" href={`tel:${site.phone}`}>
+          <Phone size={17} /> Call us
+        </a>
+        <p>Your journey. Our priority.</p>
       </dialog>
     </>
   );
 }
 export function Footer() {
+  const displayPhone = site.phone === '+919944942223' ? '+91 99449 42223' : site.phone;
   return (
-    <footer className="footer">
+    <footer className="footer legacy-footer" data-site-footer>
       <div className="container">
-        <Reveal>
-          <div className="footer-invitation">
-            <div>
-              <span className="eyebrow">THE ROAD IS CALLING</span>
-              <h2>
-                A little further.
-                <br />
-                <em>A little better.</em>
-              </h2>
-            </div>
-            <Link href="/booking" className="giant-arrow" aria-label="Book your next journey">
-              <ArrowUpRight />
+        <Reveal className="footer-intro">
+          <div>
+            <span className="footer-kicker">
+              <Route size={16} /> Travel across South India
+            </span>
+            <h2>
+              Your Journey.
+              <br />
+              <em>Our Priority.</em>
+            </h2>
+            <p>
+              Intercity One Way Taxi connects major cities with dependable doorstep pickups,
+              transparent estimates, experienced drivers and well-maintained cabs.
+            </p>
+          </div>
+          <div className="footer-actions">
+            <a href={`tel:${site.phone}`} className="button">
+              <Phone size={17} /> Call to book
+            </a>
+            <Link href="/#start-journey" className="button button-outline">
+              Get fare estimate <ArrowUpRight size={17} />
             </Link>
           </div>
         </Reveal>
-        <div className="footer-grid">
+
+        <section className="footer-cities" aria-labelledby="footer-routes-title">
+          <div className="footer-city-heading">
+            <div>
+              <span className="eyebrow">SERVICE CITIES</span>
+              <h2 id="footer-routes-title">Book from a major city</h2>
+            </div>
+            <p>Select your pickup city to begin.</p>
+          </div>
+          <div className="footer-city-grid">
+            {footerCities.map((city, index) => (
+              <Link href={bookingLink(city.pickup)} key={city.name}>
+                <div>
+                  <span className="footer-city-index">0{index + 1}</span>
+                  <h3>{city.name}</h3>
+                  <p>One-way taxis from {city.name}</p>
+                </div>
+                <ArrowUpRight size={20} />
+              </Link>
+            ))}
+          </div>
+        </section>
+
+        <div className="footer-grid legacy-footer-grid">
           <div>
             <Link href="/" aria-label="Intercity Riders home">
               <Logo />
             </Link>
             <p>
-              Thoughtfully arranged taxi journeys.
-              <br />
-              Across Tamil Nadu. Beyond the everyday.
+              Comfortable one-way, outstation and airport taxi journeys across Tamil Nadu and
+              neighbouring cities.
             </p>
+            <div className="footer-assurances">
+              <span>
+                <ShieldCheck size={16} /> Verified drivers
+              </span>
+              <span>
+                <Clock3 size={16} /> 24/7 assistance
+              </span>
+            </div>
           </div>
           <div>
             <h3>Explore</h3>
-            <Link href="/about-us">Our story</Link>
-            <Link href="/services">Ways to travel</Link>
-            <Link href="/service-routes">Find your route</Link>
-            <Link href="/service-areas">Where we go</Link>
+            <Link href="/about-us">About us</Link>
+            <Link href="/services">Our services</Link>
+            <Link href="/tariff">Taxi tariff</Link>
+            <Link href="/service-routes">All routes</Link>
+            <Link href="/contact-us">Contact us</Link>
           </div>
           <div>
-            <h3>Your journey</h3>
-            <Link href="/tariff">Fares, made clear</Link>
-            <Link href="/airport-transfers">Airport transfers</Link>
-            <Link href="/booking">Book a ride</Link>
-            <Link href="/contact-us">Get in touch</Link>
-          </div>
-          <div>
-            <h3>A real conversation</h3>
-            <a href={`tel:${site.phone}`}>{site.phone}</a>
-            <a href={`mailto:${site.email}`}>{site.email}</a>
+            <h3>Booking desk</h3>
+            <a href={`tel:${site.phone}`}>
+              <Phone size={16} /> {displayPhone}
+            </a>
+            <a href={`mailto:${site.email}`}>
+              <Mail size={16} /> {site.email}
+            </a>
             <a
-              href={`https://wa.me/${site.phone.replace(/\D/g, '')}`}
+              href="https://www.google.com/maps/dir/?api=1&destination=11.0168%2C76.9558"
               target="_blank"
               rel="noreferrer"
             >
-              Chat on WhatsApp <ArrowUpRight size={14} />
+              <MapPin size={17} /> Coimbatore Dispatch Centre
             </a>
+          </div>
+          <div>
+            <h3>Follow us</h3>
+            <div className="footer-socials">
+              {socialLinks.map((link) => (
+                <a key={link.label} href={link.href} target="_blank" rel="noreferrer">
+                  {link.label}
+                </a>
+              ))}
+            </div>
+            <Link href="/privacy" className="footer-privacy">
+              Privacy policy <ArrowUpRight size={14} />
+            </Link>
           </div>
         </div>
         <div className="footer-bottom">
-          <span>© {new Date().getFullYear()} Intercity Riders.</span>
-          <span>Go somewhere. Feel something.</span>
-          <Link href="/privacy">Privacy & your details</Link>
+          <span>© {new Date().getFullYear()} Intercity One Way Taxi. All rights reserved.</span>
+          <span>
+            Designed and developed by{' '}
+            <a href="https://wexoraa.com/" target="_blank" rel="noreferrer">
+              Wexoraa Infotech
+            </a>
+          </span>
         </div>
       </div>
     </footer>

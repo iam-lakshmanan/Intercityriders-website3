@@ -11,7 +11,7 @@ const child = spawn(process.execPath, ['--use-system-ca', resolve(standalone, 's
   stdio: 'inherit',
   env: {
     ...process.env,
-    PORT: process.env.PORT || '3020',
+    PORT: process.env.PORT || '3000',
     HOSTNAME: process.env.HOSTNAME || '0.0.0.0',
   },
   windowsHide: true,
