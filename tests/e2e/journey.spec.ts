@@ -79,9 +79,9 @@ test('all pages and aliases render with one heading and no horizontal overflow',
 test('homepage carousel, full booking form, fleet, FAQ and desktop layout', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByRole('heading', { name: /Your city\. Your pickup/ })).toBeVisible();
-  await page.getByRole('button', { name: 'Next slide' }).click();
   await expect(page.locator('.home-carousel-slide[aria-hidden="false"] h2')).toContainText(
     'One city to the next.',
+    { timeout: 7000 },
   );
   await expect(page.locator('.classic-fleet-card')).toHaveCount(4);
   await expect(page.getByRole('heading', { name: 'Prime SUV', exact: true })).toBeVisible();

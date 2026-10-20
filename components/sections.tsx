@@ -154,10 +154,14 @@ export function RoutesSection({ all = false }: { all?: boolean }) {
                   </span>
                 </div>
                 <div className="destination-caption">
+                  <span className="destination-index">{String(i + 1).padStart(2, '0')}</span>
                   <div>
                     <span className="eyebrow">FROM {r.from.toUpperCase()}</span>
                   </div>
                   <p>{r.note}</p>
+                  <span className="destination-route-cta">
+                    Plan this route <ArrowRight size={17} />
+                  </span>
                 </div>
               </Link>
             </Reveal>
@@ -400,15 +404,19 @@ export function PageHero({
   accent,
   text,
   image,
+  variant = 'default',
 }: {
   eyebrow: string;
   title: string;
   accent: string;
   text: string;
   image?: string;
+  variant?: string;
 }) {
   return (
-    <section className={`page-intro ${image ? 'with-background' : ''}`}>
+    <section
+      className={`page-intro page-hero page-hero-${variant} ${image ? 'with-background' : ''}`}
+    >
       {image && (
         <>
           <Image className="page-intro-background" src={image} alt="" fill sizes="100vw" priority />
@@ -416,22 +424,24 @@ export function PageHero({
         </>
       )}
       <div className="container">
-        <Reveal>
+        <div className="page-hero-shell">
           <div className="page-breadcrumb">
             <Link href="/">Home</Link>
             <ArrowRight size={12} />
             <span>{eyebrow}</span>
           </div>
-          <div className="page-intro-copy">
-            <span className="eyebrow">{eyebrow}</span>
-            <h1>
-              {title}
-              <br />
-              <em>{accent}</em>
-            </h1>
-            <p>{text}</p>
-          </div>
-        </Reveal>
+          <Reveal>
+            <div className="page-intro-copy page-hero-card">
+              <span className="eyebrow">{eyebrow}</span>
+              <h1>
+                {title}
+                <br />
+                <em>{accent}</em>
+              </h1>
+              <p>{text}</p>
+            </div>
+          </Reveal>
+        </div>
       </div>
     </section>
   );
