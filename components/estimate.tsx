@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { ArrowLeft, ArrowUpRight, CheckCircle2, Route, RefreshCw } from 'lucide-react';
 import { useSavedBooking, saveReceipt, type SavedBooking, type Receipt } from '@/lib/booking-store';
 import { vehicles } from '@/lib/fare.mjs';
@@ -37,18 +38,18 @@ function ReceiptView({ receipt }: { receipt: Receipt }) {
           vehicle is reserved after their confirmation.
         </p>
         <div className="reference">
-          YOUR BOOKING REFERENCE<strong>{receipt.reference}</strong>
+          YOUR ORDER ID<strong>{receipt.reference}</strong>
         </div>
         <p>
           {receipt.vehicleLabel} · {receipt.tripLabel} · {money(receipt.total)}
         </p>
         <a
           href={`https://wa.me/${site.phone.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`}
-          className="button"
+          className="button confirmation-whatsapp-action"
           target="_blank"
           rel="noreferrer"
         >
-          Share reference on WhatsApp <ArrowUpRight size={18} />
+          Continue with WhatsApp <ArrowUpRight size={18} />
         </a>
         <div>
           <Link href="/booking" className="text-link" style={{ marginTop: 25 }}>
@@ -62,6 +63,29 @@ function ReceiptView({ receipt }: { receipt: Receipt }) {
     </section>
   );
 }
+
+export function BookingConfirmation() {
+  const saved = useSavedBooking();
+  if (saved?.receipt) return <ReceiptView receipt={saved.receipt} />;
+  return (
+    <section className="section">
+      <div className="container receipt">
+        <Route size={44} />
+        <h1>
+          Confirm your fare
+          <br />
+          <em>before the final step.</em>
+        </h1>
+        <p>Your booking confirmation will appear here after you approve the fare estimate.</p>
+        <Link href={saved?.form ? '/estimate' : '/booking'} className="button">
+          {saved?.form ? 'Return to your estimate' : 'Plan a journey'}
+          <ArrowUpRight size={18} />
+        </Link>
+      </div>
+    </section>
+  );
+}
+
 export function Estimate() {
   const saved = useSavedBooking();
   if (saved?.receipt) return <ReceiptView receipt={saved.receipt} />;
@@ -85,14 +109,12 @@ export function Estimate() {
   return <EstimateJourney key={saved.requestId} saved={saved} />;
 }
 function EstimateJourney({ saved }: { saved: SavedBooking }) {
+  const router = useRouter();
   const form = saved.form!;
-  const liveEstimateUnavailable = saved.liveEstimateAvailable === false;
   const [quote, setQuote] = useState<Quote | null>(null);
-  const [error, setError] = useState(
-    liveEstimateUnavailable ? 'Your fare will be confirmed directly by the booking team.' : '',
-  );
+  const [error, setError] = useState('');
   const [submitError, setSubmitError] = useState('');
-  const [loading, setLoading] = useState(!liveEstimateUnavailable);
+  const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [attempt, setAttempt] = useState(0);
   const locked = useRef(false);
@@ -105,7 +127,6 @@ function EstimateJourney({ saved }: { saved: SavedBooking }) {
         : 'One way';
   const manualMessage = `INTERCITY RIDERS\nEnquiry reference: ${saved.enquiryReference || 'Pending'}\n${trip} | ${label}\n${form.pickup} to ${form.drop}\nPickup: ${form.pickupDate} at ${form.pickupTime} IST\nPlease help me confirm the fare and vehicle availability.`;
   useEffect(() => {
-    if (liveEstimateUnavailable) return;
     const controller = new AbortController();
     let active = true;
     async function load() {
@@ -131,7 +152,7 @@ function EstimateJourney({ saved }: { saved: SavedBooking }) {
       active = false;
       controller.abort();
     };
-  }, [form, saved.requestId, attempt, liveEstimateUnavailable]);
+  }, [form, saved.requestId, attempt]);
   async function confirm() {
     if (!quote || locked.current) return;
     locked.current = true;
@@ -162,6 +183,7 @@ function EstimateJourney({ saved }: { saved: SavedBooking }) {
         },
         saved.requestId,
       );
+      router.push('/booking-confirmation');
     } catch (error) {
       setSubmitError(error instanceof Error ? error.message : 'Please try again.');
     } finally {
@@ -191,11 +213,9 @@ function EstimateJourney({ saved }: { saved: SavedBooking }) {
     form.extraLuggage ? 'Extra luggage' : '',
   ].filter(Boolean);
   return (
-    <section className="section">
+    <section className="section estimate-section">
       <div className="container">
-        <h1 className="estimate-page-title">
-          Your journey. <em>Made clear.</em>
-        </h1>
+        <h1 className="sr-only">Your journey estimate</h1>
         <div className="estimate-topbar">
           <Link href="/booking" className="text-link">
             <ArrowLeft size={15} />
@@ -269,7 +289,7 @@ function EstimateJourney({ saved }: { saved: SavedBooking }) {
                     Refresh
                   </button>
                   <button className="button" onClick={confirm} disabled={busy}>
-                    {busy ? 'Sending your request…' : 'Confirm my request'}
+                    {busy ? 'Confirming your booking…' : 'Confirm booking'}
                     <ArrowUpRight size={18} />
                   </button>
                 </div>
@@ -283,7 +303,7 @@ function EstimateJourney({ saved }: { saved: SavedBooking }) {
                 <h3>Your journey request is received.</h3>
                 {saved.enquiryReference && (
                   <div className="reference">
-                    YOUR ENQUIRY REFERENCE<strong>{saved.enquiryReference}</strong>
+                    YOUR ORDER ID<strong>{saved.enquiryReference}</strong>
                   </div>
                 )}
                 <p>
@@ -294,11 +314,8 @@ function EstimateJourney({ saved }: { saved: SavedBooking }) {
                   {error}
                 </p>
                 <div className="estimate-actions">
-                  <a className="button" href={`tel:${site.phone}`}>
-                    Call the booking team <ArrowUpRight size={17} />
-                  </a>
                   <a
-                    className="button button-outline"
+                    className="button manual-whatsapp-action"
                     href={`https://wa.me/${site.phone.replace(/\D/g, '')}?text=${encodeURIComponent(manualMessage)}`}
                     target="_blank"
                     rel="noreferrer"

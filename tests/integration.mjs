@@ -27,11 +27,12 @@ const requestId = crypto.randomUUID();
 const enquiry = await post('/api/enquiry', { form, requestId, event: 'enquiry', website: '' });
 assert.equal(enquiry.status, 200, JSON.stringify(enquiry.data));
 assert.equal(enquiry.data.delivered, true);
+assert.equal(enquiry.data.liveEstimateAvailable, true);
 assert.equal(
   (await post('/api/enquiry', { form, requestId, event: 'enquiry', website: '' })).data.reference,
   enquiry.data.reference,
 );
-console.log('PASS: enquiry delivery and stable retry reference');
+console.log('PASS: enquiry delivery, live-estimate availability and stable retry reference');
 const quote = await post('/api/fare-estimation', { form, requestId });
 assert.equal(quote.status, 200, JSON.stringify(quote.data));
 assert.equal(quote.data.fare.total, 3400);

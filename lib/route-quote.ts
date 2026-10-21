@@ -3,9 +3,21 @@ import { calculateFare } from './fare.mjs';
 import { fingerprint, signQuote, verifyQuote } from './security.mjs';
 import { HttpError } from './server';
 import type { TripForm } from './booking-store';
+
+function quoteCredentials() {
+  return {
+    key: process.env.GOOGLE_MAPS_SERVER_API_KEY || process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
+    secret: process.env.QUOTE_SIGNING_SECRET || process.env.TELEGRAM_BOT_TOKEN,
+  };
+}
+
+export function isLiveEstimateConfigured() {
+  const { key, secret } = quoteCredentials();
+  return Boolean(key && secret && secret.length >= 32);
+}
+
 export async function createRouteQuote(form: TripForm, requestId: string) {
-  const key = process.env.GOOGLE_MAPS_SERVER_API_KEY;
-  const secret = process.env.QUOTE_SIGNING_SECRET;
+  const { key, secret } = quoteCredentials();
   if (!key || !secret || secret.length < 32)
     throw new HttpError(
       'Live estimates are temporarily unavailable. Our team can help with a manual quote.',
@@ -57,7 +69,8 @@ export async function createRouteQuote(form: TripForm, requestId: string) {
 }
 export function confirmedFare(token: unknown, form: TripForm, requestId: string) {
   try {
-    const quote = verifyQuote(token, process.env.QUOTE_SIGNING_SECRET);
+    const { secret } = quoteCredentials();
+    const quote = verifyQuote(token, secret);
     if (quote.formHash !== fingerprint(form) || quote.requestId !== requestId)
       throw new Error('This estimate does not match your journey. Refresh your estimate.');
     return calculateFare({

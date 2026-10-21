@@ -11,18 +11,24 @@ const slides = [
     title: 'Your city. Your pickup.',
     accent: 'One smooth ride.',
     text: 'Book a comfortable intercity cab from your doorstep. Travel directly to the destination that matters.',
+    image: '/images/page-banners/services-hero-v2.png',
+    alt: 'An Intercity Riders sedan travelling from the city',
   },
   {
     eyebrow: 'ONE-WAY TRAVEL, YOUR WAY',
     title: 'One city to the next.',
     accent: 'Simple from the start.',
     text: 'Choose your pickup, destination, and preferred car. We’ll help make the miles between feel effortless.',
+    image: '/images/page-banners/routes-hero-v2.png',
+    alt: 'An intercity car following a scenic mountain road',
   },
   {
     eyebrow: 'AIRPORT RIDES WITHOUT THE RUSH',
     title: 'Door to terminal.',
     accent: 'Comfortably on time.',
     text: 'Plan a calm airport transfer with a direct pickup and the space you need for every traveller and bag.',
+    image: '/images/page-banners/airport-transfers-hero-v2.png',
+    alt: 'A traveller meeting an airport transfer driver',
   },
 ] as const;
 
@@ -76,8 +82,8 @@ export function HomeHeroCarousel() {
               aria-hidden={active !== index}
             >
               <Image
-                src="/images/BANNERIMAGE.jpg"
-                alt="Intercity Riders taxi fleet"
+                src={slide.image}
+                alt={slide.alt}
                 fill
                 priority={index === 0}
                 loading="eager"
@@ -87,6 +93,9 @@ export function HomeHeroCarousel() {
               <div className="home-carousel-shade" />
               <div className="container home-carousel-content">
                 <div className="home-carousel-copy">
+                  <span className="home-carousel-index" aria-hidden="true">
+                    {String(index + 1).padStart(2, '0')}
+                  </span>
                   <span className="eyebrow">{slide.eyebrow}</span>
                   {index === 0 ? (
                     <h1>
@@ -113,21 +122,6 @@ export function HomeHeroCarousel() {
                 </div>
               </div>
             </article>
-          ))}
-        </div>
-      </div>
-      <div className="container home-carousel-controls">
-        <div className="home-carousel-dots" role="tablist" aria-label="Choose a hero slide">
-          {slides.map((slide, index) => (
-            <button
-              key={slide.eyebrow}
-              type="button"
-              className={active === index ? 'active' : ''}
-              onClick={() => goTo(index)}
-              aria-label={`Show slide ${index + 1}`}
-              aria-selected={active === index}
-              role="tab"
-            />
           ))}
         </div>
       </div>

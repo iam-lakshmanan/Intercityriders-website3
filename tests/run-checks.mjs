@@ -19,10 +19,9 @@ const env = {
   NEXT_PUBLIC_SITE_URL: base,
   INTERCITY_TEST_URL: base,
   INTERCITY_TEST_UPSTREAMS: '1',
-  TELEGRAM_BOT_TOKEN: 'isolated-test-token',
+  TELEGRAM_BOT_TOKEN: 'isolated-test-token-long-enough-to-sign-quotes-securely',
   TELEGRAM_CHAT_ID: 'isolated-test-chat',
-  GOOGLE_MAPS_SERVER_API_KEY: 'isolated-test-maps',
-  QUOTE_SIGNING_SECRET: 'isolated-test-secret-more-than-thirty-two-characters',
+  NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: 'isolated-test-maps',
   TRUSTED_IP_HEADER: 'x-intercity-test-client',
   NEXT_TELEMETRY_DISABLED: '1',
 };

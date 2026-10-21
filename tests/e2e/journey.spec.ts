@@ -139,17 +139,18 @@ test('enquiry retries keep an ID, confirmation shows the fare and clears persona
   expect(ids[0]).toBe(ids[1]);
   await expect(page.getByText('₹3,400', { exact: true })).toBeVisible();
   await expect(page.locator('main h1')).toHaveCount(1);
-  await page.getByRole('button', { name: 'Confirm my request' }).click();
+  await page.getByRole('button', { name: 'Confirm booking' }).click();
+  await expect(page).toHaveURL(/\/booking-confirmation$/);
   await expect(page.locator('main h1')).toContainText('Safely received.');
   const record = await page.evaluate(() =>
     JSON.parse(sessionStorage.getItem('intercity-riders-new-booking-v1') || 'null'),
   );
   expect(record.form).toBeUndefined();
-  expect(record.receipt.reference).toMatch(/^IR-/);
+  expect(record.receipt.reference).toMatch(/^\d{6}$/);
   expect(JSON.stringify(record)).not.toContain('Browser Test Traveller');
   await page.reload();
   await expect(page.locator('main h1')).toContainText('Safely received.');
-  await expect(page.getByRole('link', { name: 'Share reference on WhatsApp' })).toHaveAttribute(
+  await expect(page.getByRole('link', { name: 'Continue with WhatsApp' })).toHaveAttribute(
     'href',
     /https:\/\/wa.me\//,
   );
@@ -163,7 +164,7 @@ test('a delivered enquiry remains a successful workflow when live pricing is una
       status: 200,
       json: {
         delivered: true,
-        reference: 'IR-MANUAL1',
+        reference: '293490',
         status: 'enquiry-received',
         liveEstimateAvailable: false,
       },
@@ -187,16 +188,13 @@ test('a delivered enquiry remains a successful workflow when live pricing is una
   await expect(
     page.getByRole('heading', { name: 'Your journey request is received.' }),
   ).toBeVisible();
-  await expect(page.getByText('IR-MANUAL1', { exact: true })).toBeVisible();
-  await expect(page.getByRole('link', { name: 'Call the booking team' })).toHaveAttribute(
-    'href',
-    /^tel:/,
-  );
+  await expect(page.getByText('293490', { exact: true })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Call the booking team' })).toHaveCount(0);
   await expect(page.getByRole('link', { name: 'Continue on WhatsApp' })).toHaveAttribute(
     'href',
     /https:\/\/wa\.me\//,
   );
-  expect(fareRequests).toBe(0);
+  expect(fareRequests).toBe(1);
 });
 test('contact validation and mocked delivery', async ({ page }) => {
   await page.goto('/contact-us');

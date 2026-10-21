@@ -1,8 +1,8 @@
-import { randomUUID } from 'node:crypto';
+import { randomInt } from 'node:crypto';
 import { tripSchema } from '@/lib/validation.mjs';
 import { calculateFare, vehicles } from '@/lib/fare.mjs';
 import { fingerprint } from '@/lib/security.mjs';
-import { confirmedFare } from '@/lib/route-quote';
+import { confirmedFare, isLiveEstimateConfigured } from '@/lib/route-quote';
 import { readRequest, errorResponse, HttpError, notify, once } from '@/lib/server';
 export const runtime = 'nodejs';
 
@@ -26,7 +26,7 @@ export async function POST(request: Request) {
 
     const idempotencyKey = fingerprint({ form, event: body.event, id: body.requestId });
     const record = await once(idempotencyKey, async () => {
-      const reference = `IR-${randomUUID().slice(0, 8).toUpperCase()}`;
+      const reference = randomInt(100000, 1000000).toString();
       const requirements = [
         ['womanAlone', 'Woman travelling alone'],
         ['seniorCitizen', 'Senior citizen'],
@@ -59,11 +59,7 @@ export async function POST(request: Request) {
         reference,
         delivered: true as const,
         status: body.event === 'booking-confirmed' ? 'booking-received' : 'enquiry-received',
-        liveEstimateAvailable: Boolean(
-          process.env.GOOGLE_MAPS_SERVER_API_KEY &&
-          process.env.QUOTE_SIGNING_SECRET &&
-          process.env.QUOTE_SIGNING_SECRET.length >= 32,
-        ),
+        liveEstimateAvailable: isLiveEstimateConfigured(),
       };
     });
     return Response.json(record);

@@ -26,16 +26,16 @@ Existing content routes and `/about-us`, `/contact-us`, `/service-routes` aliase
 
 Set these values in `.env.local` for development, or in the production server environment:
 
-| Variable                                                         | Purpose                                                                                                                                     |
-| ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`                                | Browser Maps JavaScript, Places suggestions and route preview; restrict to your allowed website origins.                                    |
-| `GOOGLE_MAPS_SERVER_API_KEY`                                     | Private server-side Directions lookup used to issue authoritative fare quotes. Enable Directions and apply appropriate server restrictions. |
-| `QUOTE_SIGNING_SECRET`                                           | At least 32 random characters; private HMAC key for journey-bound quotes.                                                                   |
-| `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`                         | Server-only delivery to the real booking desk.                                                                                              |
-| `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_PHONE`, `NEXT_PUBLIC_EMAIL` | Verified brand details and domain.                                                                                                          |
-| `TRUSTED_IP_HEADER`                                              | Only set behind a proxy that overwrites this client-IP header.                                                                              |
+| Variable                                                         | Purpose                                                                                                                  |
+| ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`                                | Maps JavaScript, Places suggestions, route preview and the default Directions credential for fare quotes.                |
+| `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`                         | Server-only booking delivery. The bot token also signs short-lived quotes unless a dedicated signing secret is supplied. |
+| `GOOGLE_MAPS_SERVER_API_KEY`                                     | Optional private Directions-key override for production deployments.                                                     |
+| `QUOTE_SIGNING_SECRET`                                           | Optional server-only HMAC override of at least 32 characters.                                                            |
+| `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_PHONE`, `NEXT_PUBLIC_EMAIL` | Verified brand details and domain.                                                                                       |
+| `TRUSTED_IP_HEADER`                                              | Only set behind a proxy that overwrites this client-IP header.                                                           |
 
-Generate a signing key with `node -e "console.log(require('node:crypto').randomBytes(32).toString('hex'))"`. Never expose it through a `NEXT_PUBLIC_` variable.
+The complete booking workflow runs with `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`, `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID`. For stricter production key separation, set `GOOGLE_MAPS_SERVER_API_KEY` and `QUOTE_SIGNING_SECRET`; generate the latter with `node -e "console.log(require('node:crypto').randomBytes(32).toString('hex'))"`. Never expose the signing secret through a `NEXT_PUBLIC_` variable.
 
 Booking flow: enter journey → Telegram enquiry → server-issued fare estimate → signed confirmation request → Telegram booking request → minimal receipt → optional WhatsApp reference sharing. The booking team still confirms availability; delivery does not automatically allocate a vehicle.
 
