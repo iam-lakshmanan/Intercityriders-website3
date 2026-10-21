@@ -6014,7 +6014,7 @@ h3 em,
 @media (max-width: 600px) {
   .page-intro.page-hero .page-hero-shell {
     align-items: center;
-    justify-content: flex-end;
+    justify-content: center;
     padding: 68px 0 27px;
     text-align: center;
   }
