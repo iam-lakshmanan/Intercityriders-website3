@@ -1,9 +1,13 @@
 export const productionUrl = 'https://onewaydroptaxis.com';
+const phone = process.env.NEXT_PUBLIC_PHONE || '+919944945023';
+const localPhone = phone.replace(/\D/g, '').replace(/^91(?=\d{10}$)/, '');
 
 export const site = {
   name: 'Intercity Riders',
   url: process.env.NEXT_PUBLIC_SITE_URL || productionUrl,
-  phone: process.env.NEXT_PUBLIC_PHONE || '+919944942223',
+  phone,
+  displayPhone:
+    localPhone.length === 10 ? `+91 ${localPhone.slice(0, 5)} ${localPhone.slice(5)}` : phone,
   email: process.env.NEXT_PUBLIC_EMAIL || 'info@onewaytaxi.com',
   location: 'Tamil Nadu, India',
 };

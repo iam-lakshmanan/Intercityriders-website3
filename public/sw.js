@@ -9,7 +9,7 @@ const APP_SHELL = [
   '/icons/icon-512.png',
   '/icons/maskable-512.png',
   '/icons/apple-touch-icon.png',
-  '/images/car-logo3-transparent.png',
+  '/images/newlogo.png',
 ];
 
 self.addEventListener('install', (event) => {

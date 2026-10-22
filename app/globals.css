@@ -9,6 +9,7 @@
   --surface: #f4ebda;
   --paper: #fffcf5;
   --radius: 22px;
+  --radius-card: 14px;
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -2080,7 +2081,7 @@ a:hover > .round-arrow,
   display: flex;
   gap: 10px;
   border-bottom: 1px solid var(--line);
-  padding: 15px 0;
+  padding: 18px 0;
 }
 .estimate-detail-item > span {
   color: var(--muted);
@@ -2091,17 +2092,21 @@ a:hover > .round-arrow,
 }
 .estimate-detail-item small {
   display: block;
-  font-size: 9px;
+  font-size: 14px;
+  line-height: 1.45;
   color: var(--muted);
 }
 .estimate-detail-item strong {
   display: block;
-  font-size: 12px;
-  font-weight: 500;
-  margin-top: 4px;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.4;
+  margin-top: 7px;
 }
 .estimate-note {
   margin-top: 20px;
+  font-size: 14px;
+  line-height: 1.65;
 }
 .estimate-actions {
   display: flex;
@@ -3229,7 +3234,7 @@ a:hover > .round-arrow,
     gap: 8px;
   }
   .estimate-detail-item strong {
-    font-size: 11px;
+    font-size: 17px;
   }
   .estimate-actions {
     gap: 10px;
@@ -5134,8 +5139,33 @@ a:hover > .round-arrow,
   .service-body {
     min-height: 330px;
   }
-  .service-body {
+  .service-editorial .service-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     padding: 34px 22px 68px;
+    text-align: center;
+  }
+  .service-editorial .service-icon {
+    margin-inline: auto;
+  }
+  .service-editorial .service-copy {
+    width: 100%;
+    text-align: center;
+  }
+  .service-editorial .service-body > p {
+    width: 100%;
+    max-width: 290px;
+    margin-inline: auto;
+    padding: 0;
+    text-align: center;
+  }
+  .service-editorial .service-row .round-arrow {
+    right: auto;
+    bottom: 18px;
+    left: 50%;
+    transform: translateX(-50%);
   }
 }
 
@@ -5217,7 +5247,7 @@ h3 em,
   right: 13px;
   color: var(--accent-ink);
   pointer-events: none;
-  transform: translateY(-50%);
+  transform: none;
 }
 .custom-control-popover {
   position: absolute;
@@ -6486,7 +6516,6 @@ h3 em,
   .home-carousel-links .text-link {
     font-size: 10px;
   }
-
 }
 
 /* Booking confirmation: compact heading area and one clear WhatsApp action. */
@@ -6531,4 +6560,341 @@ h3 em,
   display: flex;
   width: 100%;
   justify-content: center;
+}
+
+/* Keep one restrained corner radius across every visual card section. */
+.service-row,
+.service-row:hover,
+.classic-fleet-card,
+.home-booking-form .booking-form,
+.journey-bar,
+.destination-journal:not(.all-destinations) .destination-photo,
+.all-destinations .destination-link,
+.care-image,
+.route-ledger,
+.tariff-cta,
+.contact-form,
+.contact-success,
+.vehicle-options label,
+.booking-map-card,
+.receipt,
+.reference,
+.fare-panel,
+.estimate-fare-box,
+.journey-review,
+.manual-enquiry,
+.requirements-summary,
+.footer-intro {
+  border-radius: var(--radius-card);
+}
+
+/* Readable FAQ typography on desktop and mobile. */
+.faq-layout > .reveal > p,
+.faq-layout > div > p {
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+.faq-list summary {
+  padding: 25px 0;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.55;
+}
+
+.faq-list summary small {
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.faq-answer {
+  padding: 0 34px 26px;
+  font-size: 15px;
+  line-height: 1.75;
+}
+
+.faq-plus {
+  font-size: 28px;
+  font-weight: 400;
+}
+
+/* Persistent circular call and WhatsApp actions. */
+.floating-contact-actions {
+  position: fixed;
+  right: max(20px, env(safe-area-inset-right));
+  bottom: max(22px, env(safe-area-inset-bottom));
+  z-index: 80;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+.floating-contact-button {
+  position: relative;
+  display: grid;
+  width: 58px;
+  height: 58px;
+  place-items: center;
+  border: 1px solid #fff9eb73;
+  border-radius: 50%;
+  color: #fff;
+  box-shadow: 0 12px 30px #200f0740;
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.floating-contact-button.call {
+  background: var(--orange);
+  color: var(--espresso);
+}
+
+.floating-contact-button.whatsapp {
+  background: #25d366;
+}
+
+.floating-contact-button:hover,
+.floating-contact-button:focus-visible {
+  box-shadow: 0 16px 34px #200f0752;
+  transform: translateY(-3px);
+}
+
+.floating-contact-button:focus-visible {
+  outline: 3px solid var(--cream);
+  outline-offset: 3px;
+}
+
+.floating-contact-button span {
+  position: absolute;
+  right: calc(100% + 10px);
+  width: max-content;
+  padding: 6px 9px;
+  border-radius: 6px;
+  background: var(--espresso);
+  color: var(--cream);
+  font-size: 11px;
+  font-weight: 700;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(5px);
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+
+.floating-contact-button:hover span,
+.floating-contact-button:focus-visible span {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+@media (max-width: 600px) {
+  .faq-layout > .reveal > p,
+  .faq-layout > div > p {
+    font-size: 15px;
+  }
+
+  .faq-list summary {
+    gap: 14px;
+    padding: 23px 0;
+    font-size: 16px;
+  }
+
+  .faq-list summary > span:first-child {
+    gap: 12px;
+  }
+
+  .faq-answer {
+    padding: 0 30px 24px;
+    font-size: 15px;
+  }
+
+  .floating-contact-actions {
+    right: max(14px, env(safe-area-inset-right));
+    bottom: max(16px, env(safe-area-inset-bottom));
+    gap: 9px;
+  }
+
+  .floating-contact-button {
+    width: 52px;
+    height: 52px;
+  }
+
+  .floating-contact-button span {
+    display: none;
+  }
+}
+
+/* Larger footer content typography for easier reading. */
+.footer-kicker {
+  font-size: 14px;
+}
+
+.footer-intro p {
+  font-size: 16px;
+  line-height: 1.65;
+}
+
+.footer-city-heading p {
+  font-size: 15px;
+}
+
+.footer-city-grid h3 {
+  font-size: 18px;
+}
+
+.footer-city-grid p {
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.legacy-footer-grid p {
+  font-size: 16px;
+  line-height: 1.65;
+}
+
+.legacy-footer-grid h3 {
+  font-size: 14px;
+}
+
+.legacy-footer-grid > div > a:not(:first-child),
+.legacy-footer-grid > div:not(:first-child) > a,
+.footer-privacy {
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.footer-assurances {
+  font-size: 14px;
+}
+
+.footer-socials a {
+  font-size: 13px;
+}
+
+.footer.legacy-footer .footer-bottom {
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+/* Keep quick actions fixed at opposite sides of the viewport. */
+.floating-contact-actions {
+  top: 50%;
+  right: 0;
+  bottom: auto;
+  left: 0;
+  width: 100%;
+  flex-direction: row;
+  justify-content: space-between;
+  gap: 0;
+  padding-right: max(18px, env(safe-area-inset-right));
+  padding-left: max(18px, env(safe-area-inset-left));
+  pointer-events: none;
+  transform: none;
+}
+
+.floating-contact-button {
+  pointer-events: auto;
+}
+
+.floating-contact-button.call span {
+  right: auto;
+  left: calc(100% + 10px);
+  transform: translateX(-5px);
+}
+
+.floating-contact-button.call:hover span,
+.floating-contact-button.call:focus-visible span {
+  transform: translateX(0);
+}
+
+@media (max-width: 600px) {
+  .footer-intro p,
+  .legacy-footer-grid p {
+    font-size: 15px;
+  }
+
+  .footer-city-grid h3 {
+    font-size: 17px;
+  }
+
+  .footer-city-grid p,
+  .footer-assurances,
+  .footer-socials a,
+  .footer.legacy-footer .footer-bottom {
+    font-size: 13px;
+  }
+
+  .legacy-footer-grid > div > a:not(:first-child),
+  .legacy-footer-grid > div:not(:first-child) > a,
+  .footer-privacy {
+    font-size: 15px;
+  }
+
+  .floating-contact-actions {
+    top: 50%;
+    right: 0;
+    bottom: auto;
+    left: 0;
+    padding-right: max(12px, env(safe-area-inset-right));
+    padding-left: max(12px, env(safe-area-inset-left));
+  }
+}
+
+/* Recognizable brand marks in the footer social links. */
+.footer-socials a {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  padding: 0;
+  border-radius: 50%;
+}
+
+.footer-socials .social-brand-icon {
+  width: 19px;
+  height: 19px;
+}
+
+.footer-socials a:nth-child(1) .social-brand-icon {
+  color: #1877f2;
+}
+
+.footer-socials a:nth-child(2) .social-brand-icon {
+  color: var(--cream);
+}
+
+.footer-socials a:nth-child(3) .social-brand-icon {
+  color: #e4405f;
+}
+
+.footer-socials a:hover {
+  border-color: var(--orange);
+  background: #fff9eb0d;
+  transform: translateY(-2px);
+}
+
+@media (max-width: 600px) {
+  .floating-contact-actions {
+    top: auto;
+    bottom: max(14px, env(safe-area-inset-bottom));
+  }
+
+  .footer-socials a {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+/* Bottom-edge placement for the opposite quick actions. */
+.floating-contact-actions {
+  top: auto;
+  bottom: max(22px, env(safe-area-inset-bottom));
+}
+
+@media (max-width: 600px) {
+  .floating-contact-actions {
+    top: auto;
+    bottom: max(14px, env(safe-area-inset-bottom));
+  }
 }

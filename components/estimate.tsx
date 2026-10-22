@@ -1,12 +1,12 @@
 'use client';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, ArrowUpRight, CheckCircle2, Route, RefreshCw } from 'lucide-react';
 import { useSavedBooking, saveReceipt, type SavedBooking, type Receipt } from '@/lib/booking-store';
 import { vehicles } from '@/lib/fare.mjs';
 import { site } from '@/lib/site';
-import { BookingMapPreview } from './booking-map-preview';
+import { BookingMapPreview, type RouteMetrics } from './booking-map-preview';
 type Fare = {
   travelKm: number;
   minimumKm: number;
@@ -112,6 +112,8 @@ function EstimateJourney({ saved }: { saved: SavedBooking }) {
   const router = useRouter();
   const form = saved.form!;
   const [quote, setQuote] = useState<Quote | null>(null);
+  const [routeMetrics, setRouteMetrics] = useState<RouteMetrics | null>(null);
+  const [useServerFallback, setUseServerFallback] = useState(false);
   const [error, setError] = useState('');
   const [submitError, setSubmitError] = useState('');
   const [loading, setLoading] = useState(true);
@@ -126,7 +128,25 @@ function EstimateJourney({ saved }: { saved: SavedBooking }) {
         ? 'Airport pickup'
         : 'One way';
   const manualMessage = `INTERCITY RIDERS\nEnquiry reference: ${saved.enquiryReference || 'Pending'}\n${trip} | ${label}\n${form.pickup} to ${form.drop}\nPickup: ${form.pickupDate} at ${form.pickupTime} IST\nPlease help me confirm the fare and vehicle availability.`;
+  const handleRouteResolved = useCallback((route: RouteMetrics) => {
+    setRouteMetrics(route);
+    setUseServerFallback(false);
+    setError('');
+    setLoading(true);
+  }, []);
+  const handleRouteError = useCallback(() => {
+    setRouteMetrics(null);
+    setUseServerFallback(true);
+    setError('');
+    setLoading(true);
+  }, []);
   useEffect(() => {
+    if (routeMetrics || useServerFallback) return;
+    const timer = window.setTimeout(() => setUseServerFallback(true), 2500);
+    return () => window.clearTimeout(timer);
+  }, [attempt, routeMetrics, useServerFallback]);
+  useEffect(() => {
+    if (!routeMetrics && !useServerFallback) return;
     const controller = new AbortController();
     let active = true;
     async function load() {
@@ -134,7 +154,11 @@ function EstimateJourney({ saved }: { saved: SavedBooking }) {
         const response = await fetch('/api/fare-estimation', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ form, requestId: saved.requestId }),
+          body: JSON.stringify({
+            form,
+            requestId: saved.requestId,
+            ...(routeMetrics ? { route: routeMetrics } : {}),
+          }),
           signal: AbortSignal.any([controller.signal, AbortSignal.timeout(20000)]),
         });
         const result = await response.json();
@@ -152,7 +176,7 @@ function EstimateJourney({ saved }: { saved: SavedBooking }) {
       active = false;
       controller.abort();
     };
-  }, [form, saved.requestId, attempt]);
+  }, [form, routeMetrics, saved.requestId, useServerFallback]);
   async function confirm() {
     if (!quote || locked.current) return;
     locked.current = true;
@@ -279,6 +303,8 @@ function EstimateJourney({ saved }: { saved: SavedBooking }) {
                     }}
                     onClick={() => {
                       setQuote(null);
+                      setRouteMetrics(null);
+                      setUseServerFallback(false);
                       setError('');
                       setLoading(true);
                       setAttempt((v) => v + 1);
@@ -299,16 +325,16 @@ function EstimateJourney({ saved }: { saved: SavedBooking }) {
                 </p>
               </>
             ) : (
-              <div className="manual-enquiry">
-                <h3>Your journey request is received.</h3>
+              <div className="manual-enquiry estimate-error-state">
+                <h3>We couldn’t prepare your fare yet.</h3>
                 {saved.enquiryReference && (
                   <div className="reference">
                     YOUR ORDER ID<strong>{saved.enquiryReference}</strong>
                   </div>
                 )}
                 <p>
-                  The booking team has your journey details and will contact you with the fare and
-                  vehicle availability.
+                  Check the route and try the estimate again. Your enquiry has still reached the
+                  booking team.
                 </p>
                 <p className="fine-print" role="status">
                   {error}
@@ -335,13 +361,16 @@ function EstimateJourney({ saved }: { saved: SavedBooking }) {
                       borderRight: 0,
                     }}
                     onClick={() => {
+                      setQuote(null);
+                      setRouteMetrics(null);
+                      setUseServerFallback(false);
                       setError('');
                       setLoading(true);
                       setAttempt((v) => v + 1);
                     }}
                   >
                     <RefreshCw size={14} />
-                    Retry live estimate
+                    Retry fare estimate
                   </button>
                 </div>
               </div>
@@ -352,7 +381,13 @@ function EstimateJourney({ saved }: { saved: SavedBooking }) {
               </p>
             )}
           </article>
-          <BookingMapPreview pickup={form.pickup} drop={form.drop} />
+          <BookingMapPreview
+            key={attempt}
+            pickup={form.pickup}
+            drop={form.drop}
+            onRouteResolved={handleRouteResolved}
+            onRouteError={handleRouteError}
+          />
         </div>
       </div>
     </section>

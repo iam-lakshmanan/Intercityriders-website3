@@ -28,9 +28,9 @@ Set these values in `.env.local` for development, or in the production server en
 
 | Variable                                                         | Purpose                                                                                                                  |
 | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`                                | Maps JavaScript, Places suggestions, route preview and the default Directions credential for fare quotes.                |
+| `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`                                | Browser Maps JavaScript, Places suggestions, route preview, distance and duration used for fare quotes.                  |
 | `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`                         | Server-only booking delivery. The bot token also signs short-lived quotes unless a dedicated signing secret is supplied. |
-| `GOOGLE_MAPS_SERVER_API_KEY`                                     | Optional private Directions-key override for production deployments.                                                     |
+| `GOOGLE_MAPS_SERVER_API_KEY`                                     | Optional private Directions key used only as a server-side fallback.                                                     |
 | `QUOTE_SIGNING_SECRET`                                           | Optional server-only HMAC override of at least 32 characters.                                                            |
 | `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_PHONE`, `NEXT_PUBLIC_EMAIL` | Verified brand details and domain.                                                                                       |
 | `TRUSTED_IP_HEADER`                                              | Only set behind a proxy that overwrites this client-IP header.                                                           |

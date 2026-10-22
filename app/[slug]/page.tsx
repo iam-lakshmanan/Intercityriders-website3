@@ -387,7 +387,7 @@ export default async function ContentPage({ params }: { params: Promise<{ slug: 
                   <Phone size={23} />
                   <span>
                     <small>GIVE US A CALL</small>
-                    {site.phone}
+                    {site.displayPhone}
                   </span>
                   <ArrowUpRight size={20} />
                 </a>

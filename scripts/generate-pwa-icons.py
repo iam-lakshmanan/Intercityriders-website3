@@ -2,7 +2,7 @@ from pathlib import Path
 from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCE = ROOT / "public" / "images" / "car-logo3-transparent.png"
+SOURCE = ROOT / "public" / "images" / "newlogo.png"
 OUTPUT = ROOT / "public" / "icons"
 BACKGROUND = (32, 15, 7, 255)
 

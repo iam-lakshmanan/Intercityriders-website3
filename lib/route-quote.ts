@@ -12,8 +12,54 @@ function quoteCredentials() {
 }
 
 export function isLiveEstimateConfigured() {
-  const { key, secret } = quoteCredentials();
-  return Boolean(key && secret && secret.length >= 32);
+  const { secret } = quoteCredentials();
+  return Boolean(process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY && secret && secret.length >= 32);
+}
+
+function signedQuote(
+  form: TripForm,
+  requestId: string,
+  distanceKm: number,
+  durationMins: number,
+  secret: string,
+) {
+  const fare = calculateFare({
+    vehicleId: form.vehicle,
+    tripType: form.tripType,
+    distanceKm,
+    durationMins,
+  });
+  const expires = Date.now() + 15 * 60000;
+  return {
+    fare,
+    token: signQuote(
+      { formHash: fingerprint(form), requestId, distanceKm, durationMins, expires },
+      secret,
+    ),
+    expires,
+  };
+}
+
+export function createBrowserRouteQuote(
+  form: TripForm,
+  requestId: string,
+  route: { distanceKm: number; durationMins: number },
+) {
+  const { secret } = quoteCredentials();
+  const distanceKm = Number(route.distanceKm);
+  const durationMins = Number(route.durationMins);
+  if (!secret || secret.length < 32)
+    throw new HttpError('Live estimates are temporarily unavailable.', 503);
+  if (
+    !Number.isFinite(distanceKm) ||
+    distanceKm <= 0 ||
+    distanceKm > 5000 ||
+    !Number.isFinite(durationMins) ||
+    durationMins <= 0 ||
+    durationMins > 10000
+  )
+    throw new HttpError('A valid Google Maps route is required for this estimate.');
+  return signedQuote(form, requestId, distanceKm, durationMins, secret);
 }
 
 export async function createRouteQuote(form: TripForm, requestId: string) {
@@ -51,21 +97,7 @@ export async function createRouteQuote(form: TripForm, requestId: string) {
     );
   const distanceKm = Number(leg.distance.value) / 1000;
   const durationMins = Number(leg.duration.value) / 60;
-  const fare = calculateFare({
-    vehicleId: form.vehicle,
-    tripType: form.tripType,
-    distanceKm,
-    durationMins,
-  });
-  const expires = Date.now() + 15 * 60000;
-  return {
-    fare,
-    token: signQuote(
-      { formHash: fingerprint(form), requestId, distanceKm, durationMins, expires },
-      secret,
-    ),
-    expires,
-  };
+  return signedQuote(form, requestId, distanceKm, durationMins, secret);
 }
 export function confirmedFare(token: unknown, form: TripForm, requestId: string) {
   try {

@@ -33,11 +33,15 @@ assert.equal(
   enquiry.data.reference,
 );
 console.log('PASS: enquiry delivery, live-estimate availability and stable retry reference');
-const quote = await post('/api/fare-estimation', { form, requestId });
+const quote = await post('/api/fare-estimation', {
+  form,
+  requestId,
+  route: { distanceKm: 200, durationMins: 180 },
+});
 assert.equal(quote.status, 200, JSON.stringify(quote.data));
 assert.equal(quote.data.fare.total, 3400);
 assert.equal(typeof quote.data.token, 'string');
-console.log('PASS: server-fetched route and signed ₹3400 estimate');
+console.log('PASS: browser-measured route and signed ₹3400 estimate');
 const untrusted = await post('/api/enquiry', {
   form,
   requestId,

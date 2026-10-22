@@ -186,7 +186,7 @@ test('a delivered enquiry remains a successful workflow when live pricing is una
   await page.getByRole('button', { name: 'Get my fare estimate' }).click();
   await expect(page).toHaveURL(/\/estimate$/);
   await expect(
-    page.getByRole('heading', { name: 'Your journey request is received.' }),
+    page.getByRole('heading', { name: 'We couldn’t prepare your fare yet.' }),
   ).toBeVisible();
   await expect(page.getByText('293490', { exact: true })).toBeVisible();
   await expect(page.getByRole('link', { name: 'Call the booking team' })).toHaveCount(0);

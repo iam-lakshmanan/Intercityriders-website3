@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Header, Footer } from '@/components/shell';
+import { Header, Footer, FloatingActions } from '@/components/shell';
 import { MotionProvider } from '@/components/motion';
 import { PwaRegister } from '@/components/pwa-register';
 import { site } from '@/lib/site';
@@ -55,6 +55,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           <Header />
           <main id="main-content">{children}</main>
           <Footer />
+          <FloatingActions />
           <PwaRegister />
         </MotionProvider>
       </body>
